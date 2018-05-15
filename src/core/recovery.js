@@ -1,3 +1,4 @@
+var d3 = require('d3');
 var zoomextent = require('../lib/zoomextent'),
     qs = require('qs-hash');
 

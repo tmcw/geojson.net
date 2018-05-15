@@ -1,3 +1,4 @@
+var d3 = require('d3');
 module.exports = function(context) {
     return function(e) {
         var sel = d3.select(e.popup._contentNode);

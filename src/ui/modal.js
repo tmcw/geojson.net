@@ -1,3 +1,4 @@
+var d3 = require('d3');
 module.exports = function(selection, blocking) {
 
     var previous = selection.select('div.modal');

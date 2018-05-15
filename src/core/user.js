@@ -1,3 +1,4 @@
+var d3 = require('d3');
 var config = require('../config.js')(location.hostname);
 
 module.exports = function(context) {

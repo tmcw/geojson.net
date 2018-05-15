@@ -1,3 +1,4 @@
+var d3 = require('d3');
 var readDrop = require('../lib/readfile.js').readDrop,
     flash = require('./flash.js'),
     zoomextent = require('../lib/zoomextent');

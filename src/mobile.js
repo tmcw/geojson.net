@@ -1,3 +1,4 @@
+var d3 = require('d3');
 var ui = require('./ui'),
     map = require('./ui/map'),
     data = require('./core/data'),

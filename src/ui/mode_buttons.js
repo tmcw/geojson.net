@@ -1,3 +1,4 @@
+var d3 = require('d3');
 var table = require('../panel/table'),
     json = require('../panel/json'),
     help = require('../panel/help');
@@ -40,7 +41,9 @@ module.exports = function(context, pane) {
 
         buttons = enter.merge(buttons);
 
-        d3.select(buttons.node()).trigger('click');
+        var evt = document.createEvent('HTMLEvents');
+        evt.initEvent('click', true, true);
+        buttons.node().dispatchEvent(evt);
 
         function buttonClick(d) {
             buttons.classed('active', function(_) { return d.icon == _.icon; });

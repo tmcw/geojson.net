@@ -1,3 +1,4 @@
+var d3 = require('d3');
 var qs = require('qs-hash'),
     xtend = require('xtend');
 

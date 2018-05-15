@@ -1,3 +1,4 @@
+var d3 = require('d3');
 var gist = require('../source/gist'),
     modal = require('./modal');
 

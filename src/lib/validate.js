@@ -1,3 +1,4 @@
+var d3 = require('d3');
 var geojsonhint = require('geojsonhint');
 
 module.exports = function(callback) {

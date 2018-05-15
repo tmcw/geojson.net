@@ -1,3 +1,5 @@
+var CodeMirror = require('codemirror');
+var jsMode = require('codemirror/mode/javascript/javascript');
 var validate = require('../lib/validate'),
     zoomextent = require('../lib/zoomextent'),
     saver = require('../ui/saver.js');

@@ -5,11 +5,12 @@
   "main": "index.html",
   "dependencies": {
     "@mapbox/gist-map-browser": "0.2.1",
-    "@mapbox/github-file-browser": "0.6.1",
     "bowser": "0.3.2",
     "brfs": "^1.4.3",
+    "browser-request": "^0.3.3",
     "clean-css": "~2.0.7",
     "clone": "0.1.16",
+    "codemirror": "^5.37.0",
     "csv2geojson": "3.6.1",
     "d3": "^4.12.0",
     "d3-metatable": "^1.0.0",
@@ -24,7 +25,6 @@
     "geojson2dsv": "0.0.0",
     "geojsonhint": "0.3.4",
     "gtfs2geojson": "^1.0.0",
-    "jsonlint": "1.6.0",
     "leaflet-draw": "0.2.3",
     "leaflet-geodesy": "0.1.1",
     "leaflet-hash": "0.2.1",
@@ -39,20 +39,21 @@
     "togeojson": "0.5.0",
     "togpx": "0.5.4",
     "tokml": "0.3.0",
-    "topojson": "1.6.8",
+    "topojson": "^3.0.2",
+    "treeui": "^0.1.1",
     "uglify-js": "2.4.1",
     "wellknown": "0.3.1",
     "wkx": "^0.4.1",
     "xtend": "3.0.0"
   },
   "devDependencies": {
-    "browserify": "^14.0.0",
+    "parcel-bundler": "^1.8.1",
     "eslint": "^1.10.3",
     "tape": "~2.12.3"
   },
   "scripts": {
-    "test": "eslint src",
-    "test-browser": "browserify test/index.js | testling"
+    "start": "parcel index.html",
+    "test": "eslint src"
   },
   "repository": {
     "type": "git",

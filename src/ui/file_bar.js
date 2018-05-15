@@ -1,3 +1,4 @@
+var d3 = require('d3');
 var shpwrite = require('shp-write'),
     clone = require('clone'),
     geojson2dsv = require('geojson2dsv'),
@@ -5,7 +6,7 @@ var shpwrite = require('shp-write'),
     topojson = require('topojson'),
     saveAs = require('filesaver.js'),
     tokml = require('tokml'),
-    githubBrowser = require('@mapbox/github-file-browser'),
+    githubBrowser = require('./file_browser.js'),
     gistBrowser = require('@mapbox/gist-map-browser'),
     geojsonNormalize = require('geojson-normalize'),
     wellknown = require('wellknown');

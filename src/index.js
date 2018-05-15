@@ -1,4 +1,5 @@
-var ui = require('./ui'),
+var d3 = require('d3');
+var ui = require('./ui.js'),
     map = require('./ui/map'),
     data = require('./core/data'),
     loader = require('./core/loader'),

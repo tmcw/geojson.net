@@ -1,8 +1,9 @@
-var buttons = require('./ui/mode_buttons'),
-    file_bar = require('./ui/file_bar'),
-    dnd = require('./ui/dnd'),
-    userUi = require('./ui/user'),
-    layer_switch = require('./ui/layer_switch');
+var d3 = require('d3'),
+    buttons = require('./ui/mode_buttons.js'),
+    file_bar = require('./ui/file_bar.js'),
+    dnd = require('./ui/dnd.js'),
+    userUi = require('./ui/user.js'),
+    layer_switch = require('./ui/layer_switch.js');
 
 module.exports = ui;
 

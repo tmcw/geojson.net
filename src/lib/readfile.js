@@ -1,3 +1,4 @@
+var d3 = require('d3');
 var topojson = require('topojson'),
     toGeoJSON = require('togeojson'),
     gtfs2geojson = require('gtfs2geojson'),
