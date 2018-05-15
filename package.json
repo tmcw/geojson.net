@@ -29,7 +29,6 @@
     "leaflet-draw": "1.0.2",
     "leaflet-geodesy": "0.1.1",
     "leaflet-hash": "0.2.1",
-    "marked": "0.3.2",
     "osmtogeojson": "2.0.5",
     "polyline": "^0.2.0",
     "polytogeojson": "0.0.1",
