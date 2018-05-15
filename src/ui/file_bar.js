@@ -30,7 +30,6 @@ var share = require('./share'),
 module.exports = function fileBar(context) {
 
     var shpSupport = typeof ArrayBuffer !== 'undefined';
-    var mapboxAPI = /a\.tiles\.mapbox.com/.test(L.mapbox.config.HTTP_URL);
     var githubAPI = !!config.GithubAPI;
     var githubBase = githubAPI ? config.GithubAPI + '/api/v3': 'https://api.github.com';
 
@@ -65,7 +64,7 @@ module.exports = function fileBar(context) {
 
         var actions = [{
             title: 'Save',
-            action: (mapboxAPI || githubAPI) ? saveAction : function() {},
+            action: (githubAPI) ? saveAction : function() {},
             children: exportFormats
         }, {
             title: 'New',
@@ -153,7 +152,7 @@ module.exports = function fileBar(context) {
             ]
         }];
 
-        if (mapboxAPI || githubAPI) {
+        if (githubAPI) {
             actions.unshift({
                 title: 'Open',
                 children: [
@@ -186,12 +185,12 @@ module.exports = function fileBar(context) {
                     action: clickGistSave
                 });
 
-            if (mapboxAPI) actions.splice(3, 0, {
-                    title: 'Share',
-                    action: function() {
-                        context.container.call(share(context));
-                    }
-                });
+            actions.splice(3, 0, {
+                title: 'Share',
+                action: function() {
+                    context.container.call(share(context));
+                }
+            });
         } else {
             actions.unshift({
                 title: 'Open',
@@ -230,7 +229,7 @@ module.exports = function fileBar(context) {
         var name = selection.append('div')
             .attr('class', 'name');
 
-        if (mapboxAPI || githubAPI) {
+        if (githubAPI) {
             var filetype = name.append('a')
                 .attr('target', '_blank')
                 .attr('class', 'icon-file-alt');
@@ -441,10 +440,10 @@ module.exports = function fileBar(context) {
             var data = d.obj,
                 type = data.type,
                 path = data.path;
-            if (mapboxAPI || githubAPI) filename
+            if (githubAPI) filename
                 .text(path ? path : 'unsaved')
                 .classed('deemphasize', context.data.dirty);
-            if (mapboxAPI || githubAPI) filetype
+            if (githubAPI) filetype
                 .attr('href', data.url)
                 .attr('class', sourceIcon(type));
             saveNoun(type == 'github' ? 'Commit' : 'Save');

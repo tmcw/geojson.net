@@ -22,11 +22,11 @@ module.exports = function(context, readonly) {
     writable = !readonly;
 
     function map(selection) {
-        context.map = L.mapbox.map(selection.node(), null)
-            .setView([20, 0], 2)
-            .addControl(L.mapbox.geocoderControl('mapbox.places', {
-                position: 'topright'
-            }));
+        context.map = L.map(selection.node(), null)
+            .setView([20, 0], 2);
+        // .addControl(L.mapbox.geocoderControl('mapbox.places', {
+        //       position: 'topright'
+        //     }));
 
         L.control.scale().setPosition('bottomright').addTo(context.map);
         context.map.zoomControl.setPosition('topright');
@@ -44,7 +44,7 @@ module.exports = function(context, readonly) {
                   polyline: { metric: (navigator.language !== 'en-us' && navigator.language !== 'en-US') },
                   polygon: { metric: (navigator.language !== 'en-us' && navigator.language !== 'en-US') },
                   marker: {
-                      icon: L.mapbox.marker.icon({})
+                      // icon: L.mapbox.marker.icon({})
                   }
               }
           }).addTo(context.map);

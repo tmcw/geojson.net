@@ -3,44 +3,28 @@ var d3 = require('d3');
 module.exports = function(context) {
 
     return function(selection) {
-        var layers;
-
-        if (!(/a\.tiles\.mapbox.com/).test(L.mapbox.config.HTTP_URL)) {
-            layers = [{
-                title: 'Mapbox',
-                layer: L.mapbox.tileLayer('mapbox.osm-bright')
-            }, {
-                title: 'Mapbox Outdoors',
-                layer: L.mapbox.tileLayer('mapbox.mapbox-outdoors')
-            }, {
-                title: 'Satellite',
-                layer: L.mapbox.tileLayer('mapbox.satellite-full')
-            }];
-
-        } else {
-            layers = [{
-                title: 'Mapbox',
-                layer: L.mapbox.tileLayer('mapbox.streets')
-            }, {
-                title: 'Satellite',
-                layer: L.mapbox.tileLayer('mapbox.satellite')
-            }, {
-                title: 'OSM',
-                layer: L.tileLayer('https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-                })
-            }
-            // OCM tiles from Thunderforest require an API key. Add your key and uncomment the lines
-            // below to enable the OCM layer.
-            //       
-            // , {
-            //    title: 'OCM',
-            //    layer: L.tileLayer('https://a.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=<insert-your-apikey-here>', {
-            //       attribution: 'Maps &copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, Data &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-            //    })
-            // }
-            ];
+        var layers = [{
+            title: 'Mapbox',
+            layer: L.tileLayer('mapbox.streets')
+        }, {
+            title: 'Satellite',
+            layer: L.tileLayer('mapbox.satellite')
+        }, {
+            title: 'OSM',
+            layer: L.tileLayer('https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+            })
         }
+        // OCM tiles from Thunderforest require an API key. Add your key and uncomment the lines
+        // below to enable the OCM layer.
+        //       
+        // , {
+        //    title: 'OCM',
+        //    layer: L.tileLayer('https://a.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=<insert-your-apikey-here>', {
+        //       attribution: 'Maps &copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, Data &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        //    })
+        // }
+        ];
 
         var layerSwap = function(d) {
             var clicked = this instanceof d3.selection ? this.node() : this;
