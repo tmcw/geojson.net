@@ -1,4 +1,5 @@
 var d3 = require('d3');
+var keybinding = require('../../lib/d3.keybinding');
 module.exports = function(selection, blocking) {
 
     var previous = selection.select('div.modal');
@@ -27,7 +28,7 @@ module.exports = function(selection, blocking) {
         keybinding.off();
     };
 
-    var keybinding = d3.keybinding('modal')
+    var keybinding = keybinding('modal')
         .on('⌫', shaded.close)
         .on('⎋', shaded.close);
 

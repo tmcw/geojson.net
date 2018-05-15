@@ -1,3 +1,4 @@
+var L = require('leaflet');
 module.exports = function(map, feature, bounds) {
     var zoomLevel;
 

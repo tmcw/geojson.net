@@ -1,3 +1,4 @@
+var L = require('leaflet');
 var d3 = require('d3');
 module.exports = function(context) {
 

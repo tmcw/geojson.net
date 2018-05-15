@@ -1,4 +1,5 @@
 var d3 = require('d3');
+var L = require('leaflet');
 module.exports = function(context) {
     if (!(/a\.tiles\.mapbox\.com/).test(L.mapbox.config.HTTP_URL) && !require('../config.js')(location.hostname).GithubAPI) {
         return function() {};

@@ -1,3 +1,4 @@
+var L = require('leaflet');
 var escape = require('escape-html'),
     geojsonRandom = require('geojson-random'),
     geojsonExtent = require('geojson-extent'),

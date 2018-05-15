@@ -1,5 +1,6 @@
 var d3 = require('d3');
 var Draw = require('leaflet-draw');
+var L = require('leaflet');
 require('qs-hash');
 require('../lib/custom_hash.js');
 

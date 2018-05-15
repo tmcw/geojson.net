@@ -1,3 +1,4 @@
+var L = require('leaflet');
 var qs = require('qs-hash');
 require('leaflet-hash');
 

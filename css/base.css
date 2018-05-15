@@ -255,5 +255,5 @@ input[type=text] {
   height:40px;
   border-radius:50%;
   opacity:0.25;
-  background:#444 url(spinner.gif) 50% 50% no-repeat;
+  background:#444 url("./spinner.gif") 50% 50% no-repeat;
 }

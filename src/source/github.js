@@ -1,3 +1,4 @@
+var d3 = require('d3');
 module.exports.save = save;
 module.exports.load = load;
 module.exports.loadRaw = loadRaw;

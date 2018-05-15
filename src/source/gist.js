@@ -1,3 +1,4 @@
+var d3 = require('d3');
 var fs = require('fs');
 var tmpl = fs.readFileSync('data/share.html', 'utf8');
 

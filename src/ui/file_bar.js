@@ -1,4 +1,6 @@
+var L = require('leaflet');
 var d3 = require('d3');
+var keybinding = require('../../lib/d3.keybinding');
 var shpwrite = require('shp-write'),
     clone = require('clone'),
     geojson2dsv = require('geojson2dsv'),
@@ -493,7 +495,7 @@ module.exports = function fileBar(context) {
         }
 
         d3.select(document).call(
-            d3.keybinding('file_bar')
+            keybinding('file_bar')
                 .on('⌘+o', function() {
                     blindImport();
                     d3.event.preventDefault();
