@@ -1,6 +1,7 @@
 import React from "react";
 import CodeMirror from "codemirror";
 import jsMode from "codemirror/mode/javascript/javascript";
+import stringify from "json-stringify-pretty-compact";
 import zoomextent from "../lib/zoomextent";
 import { hint } from "@mapbox/geojsonhint";
 import saver from "../ui/saver.js";
@@ -103,7 +104,7 @@ export default class Code extends React.Component {
       lineNumbers: true,
       theme: "neat"
     });
-    editor.setValue(JSON.stringify(geojson, null, 2));
+    editor.setValue(stringify(geojson));
     editor.on("change", this.maybeChange);
     this.setState({
       editor
@@ -113,7 +114,7 @@ export default class Code extends React.Component {
     const { geojson } = this.props;
     const { editor } = this.state;
     editor.off("change", this.maybeChange);
-    editor.setValue(JSON.stringify(geojson, null, 2));
+    editor.setValue(stringify(geojson));
     editor.on("change", this.maybeChange);
   }
   render() {
