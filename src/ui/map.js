@@ -1,103 +1,111 @@
-var d3 = require("d3");
-var Draw = require("leaflet-draw");
-var L = require("leaflet");
-var marker = require("./marker");
-var simplestyle = require("./simplestyle");
-require("qs-hash");
-require("../lib/custom_hash.js");
-
-var popup = require("../lib/popup"),
-  escape = require("escape-html"),
-  LGeo = require("leaflet-geodesy"),
-  geojsonRewind = require("geojson-rewind"),
-  writable = false,
-  showStyle = true,
-  makiValues = require("../../data/maki.json"),
-  maki = "";
-
+import React from "react";
+import Draw from "leaflet-draw";
+import L from "leaflet";
+import marker from "../map/marker";
+import { layers } from "../layers";
+import geojsonRewind from "geojson-rewind";
+import simplestyle from "./simplestyle";
+var makiValues = require("../../data/maki.json");
+import LGeo from "leaflet-geodesy";
+// require("qs-hash");
+// require("../lib/custom_hash.js");
+//
+// var popup = require("../lib/popup"),
+//   escape = require("escape-html"),
+//
+let maki = "";
 for (var i = 0; i < makiValues.length; i++) {
   maki += '<option value="' + makiValues[i].icon + '">';
 }
 
-module.exports = function(context, readonly) {
-  writable = !readonly;
-
-  function map(selection) {
-    context.map = L.map(selection.node(), null).setView([20, 0], 2);
-    // .addControl(L.mapbox.geocoderControl('mapbox.places', {
-    //       position: 'topright'
-    //     }));
-
+export default class Map extends React.Component {
+  constructor(props) {
+    super(props);
+    this.mapRef = React.createRef();
+  }
+  componentDidMount() {
+    let map = new L.Map(this.mapRef.current);
+    const { layer } = this.props;
     L.control
       .scale()
       .setPosition("bottomright")
-      .addTo(context.map);
-    context.map.zoomControl.setPosition("topright");
-
-    L.hash(context.map);
-
-    context.mapLayer = L.featureGroup().addTo(context.map);
-
-    if (writable) {
-      context.drawControl = new L.Control.Draw({
-        position: "topright",
-        edit: { featureGroup: context.mapLayer },
-        draw: {
-          circle: false,
-          polyline: {
-            metric:
-              navigator.language !== "en-us" && navigator.language !== "en-US"
-          },
-          polygon: {
-            metric:
-              navigator.language !== "en-us" && navigator.language !== "en-US"
-          },
-          marker: {
-            icon: marker.icon({})
-          }
+      .addTo(map);
+    map.zoomControl.setPosition("topright");
+    // L.hash(map);
+    let mapLayer = L.featureGroup().addTo(map);
+    const metric =
+      navigator.language !== "en-us" && navigator.language !== "en-US";
+    let drawControl = new L.Control.Draw({
+      position: "topright",
+      edit: { featureGroup: mapLayer },
+      draw: {
+        circle: false,
+        polyline: {
+          metric
+        },
+        polygon: {
+          metric
+        },
+        marker: {
+          icon: marker.icon({})
         }
-      }).addTo(context.map);
+      }
+    }).addTo(map);
+    map.setView([20, 0], 2);
 
-      context.map.on("draw:edited", update).on("draw:deleted", update);
-    }
-
-    context.map.on("draw:created", created).on("popupopen", popup(context));
-
-    context.map.attributionControl.setPrefix(
+    map.attributionControl.setPrefix(
       '<a target="_blank" href="http://geojson.net/about.html">About</a>'
     );
 
-    function update() {
-      var geojson = context.mapLayer.toGeoJSON();
-      geojson = geojsonRewind(geojson);
-      geojsonToLayer(geojson, context.mapLayer);
-      context.data.set({ map: layerToGeoJSON(context.mapLayer) }, "map");
-    }
-
-    context.dispatch.on("change.map", function() {
-      geojsonToLayer(context.data.get("map"), context.mapLayer);
+    const baseLayerGroup = L.layerGroup().addTo(map);
+    layers.find(({ id }) => id === layer).layer.addTo(baseLayerGroup);
+    map
+      .on("draw:edited", this.updateFromMap)
+      .on("draw:deleted", this.updateFromMap)
+      .on("draw:created", this.createFromMap);
+    this.setState({
+      map,
+      baseLayerGroup,
+      mapLayer
     });
-
-    function created(e) {
-      context.mapLayer.addLayer(e.layer);
-      update();
-    }
   }
-
-  function layerToGeoJSON(layer) {
-    var features = [];
-    layer.eachLayer(collect);
-    function collect(l) {
-      if ("toGeoJSON" in l) features.push(l.toGeoJSON());
+  createFromMap = e => {
+    const { mapLayer } = this.state;
+    mapLayer.addLayer(e.layer);
+    this.updateFromMap();
+  };
+  updateFromMap = () => {
+    const { setGeojson } = this.props;
+    const { mapLayer } = this.state;
+    let geojson = geojsonRewind(mapLayer.toGeoJSON());
+    setGeojson(geojson);
+  };
+  componentDidUpdate(prevProps, prevState) {
+    console.log("map -> componentDidUpdate");
+    const { layer, geojson } = this.props;
+    const { baseLayerGroup, mapLayer, map } = this.state;
+    if (prevProps.layer !== layer) {
+      baseLayerGroup
+        .clearLayers()
+        .addLayer(layers.find(({ id }) => id === layer).layer);
     }
-    return {
-      type: "FeatureCollection",
-      features: features
-    };
+    geojsonToLayer(geojson, mapLayer);
   }
-
-  return map;
-};
+  render() {
+    return <div className="flex-auto" ref={this.mapRef} />;
+  }
+}
+function layerToGeoJSON(layer) {
+  var features = [];
+  layer.eachLayer(collect);
+  function collect(l) {
+    if ("toGeoJSON" in l) features.push(l.toGeoJSON());
+  }
+  return {
+    type: "FeatureCollection",
+    features: features
+  };
+}
 
 function geojsonToLayer(geojson, layer) {
   layer.clearLayers();
@@ -108,6 +116,7 @@ function geojsonToLayer(geojson, layer) {
       return marker.style(feature, latlon);
     }
   }).eachLayer(add);
+
   function add(l) {
     bindPopup(l);
     l.addTo(layer);
@@ -136,7 +145,7 @@ function bindPopup(l) {
 
   if (!Object.keys(properties).length) properties = { "": "" };
 
-  if (l.feature && l.feature.geometry && writable) {
+  if (l.feature && l.feature.geometry) {
     if (
       l.feature.geometry.type === "Point" ||
       l.feature.geometry.type === "MultiPoint"
@@ -144,28 +153,22 @@ function bindPopup(l) {
       if (!("marker-color" in properties)) {
         table +=
           '<tr class="style-row"><th><input type="text" value="marker-color"' +
-          (!writable ? " readonly" : "") +
           " /></th>" +
           '<td><input type="color" value="#7E7E7E"' +
-          (!writable ? " readonly" : "") +
           " /></td></tr>";
       }
       if (!("marker-size" in properties)) {
         table +=
           '<tr class="style-row"><th><input type="text" value="marker-size"' +
-          (!writable ? " readonly" : "") +
           " /></th>" +
           '<td><input type="text" list="marker-size" value="medium"' +
-          (!writable ? " readonly" : "") +
           ' /><datalist id="marker-size"><option value="small"><option value="medium"><option value="large"></datalist></td></tr>';
       }
       if (!("marker-symbol" in properties)) {
         table +=
           '<tr class="style-row"><th><input type="text" value="marker-symbol"' +
-          (!writable ? " readonly" : "") +
           " /></th>" +
           '<td><input type="text" list="marker-symbol" value=""' +
-          (!writable ? " readonly" : "") +
           ' /><datalist id="marker-symbol">' +
           maki +
           "</datalist></td></tr>";
@@ -180,28 +183,22 @@ function bindPopup(l) {
       if (!("stroke" in properties)) {
         table +=
           '<tr class="style-row"><th><input type="text" value="stroke"' +
-          (!writable ? " readonly" : "") +
           " /></th>" +
           '<td><input type="color" value="#555555"' +
-          (!writable ? " readonly" : "") +
           " /></td></tr>";
       }
       if (!("stroke-width" in properties)) {
         table +=
           '<tr class="style-row"><th><input type="text" value="stroke-width"' +
-          (!writable ? " readonly" : "") +
           " /></th>" +
           '<td><input type="number" min="0" step="0.1" value="2"' +
-          (!writable ? " readonly" : "") +
           " /></td></tr>";
       }
       if (!("stroke-opacity" in properties)) {
         table +=
           '<tr class="style-row"><th><input type="text" value="stroke-opacity"' +
-          (!writable ? " readonly" : "") +
           " /></th>" +
           '<td><input type="number" min="0" max="1" step="0.1" value="1"' +
-          (!writable ? " readonly" : "") +
           " /></td></tr>";
       }
     }
@@ -212,101 +209,82 @@ function bindPopup(l) {
       if (!("fill" in properties)) {
         table +=
           '<tr class="style-row"><th><input type="text" value="fill"' +
-          (!writable ? " readonly" : "") +
           " /></th>" +
           '<td><input type="color" value="#555555"' +
-          (!writable ? " readonly" : "") +
           " /></td></tr>";
       }
       if (!("fill-opacity" in properties)) {
         table +=
           '<tr class="style-row"><th><input type="text" value="fill-opacity"' +
-          (!writable ? " readonly" : "") +
           " /></th>" +
           '<td><input type="number" min="0" max="1" step="0.1" value="0.5"' +
-          (!writable ? " readonly" : "") +
           " /></td></tr>";
       }
     }
   }
 
   for (var key in properties) {
-    if (
-      (key == "marker-color" || key == "stroke" || key == "fill") &&
-      writable
-    ) {
+    if (key == "marker-color" || key == "stroke" || key == "fill") {
       table +=
         '<tr class="style-row"><th><input type="text" value="' +
         key +
         '"' +
-        (!writable ? " readonly" : "") +
         " /></th>" +
         '<td><input type="color" value="' +
         properties[key] +
         '"' +
-        (!writable ? " readonly" : "") +
         " /></td></tr>";
-    } else if (key == "marker-size" && writable) {
+    } else if (key == "marker-size") {
       table +=
         '<tr class="style-row"><th><input type="text" value="' +
         key +
         '"' +
-        (!writable ? " readonly" : "") +
         " /></th>" +
         '<td><input type="text" list="marker-size" value="' +
         properties[key] +
         '"' +
-        (!writable ? " readonly" : "") +
         ' /><datalist id="marker-size"><option value="small"><option value="medium"><option value="large"></datalist></td></tr>';
-    } else if (key == "marker-symbol" && writable) {
+    } else if (key == "marker-symbol") {
       table +=
         '<tr class="style-row"><th><input type="text" value="' +
         key +
         '"' +
-        (!writable ? " readonly" : "") +
         " /></th>" +
         '<td><input type="text" list="marker-symbol" value="' +
         properties[key] +
         '"' +
-        (!writable ? " readonly" : "") +
         ' /><datalist id="marker-symbol">' +
         maki +
         "</datalist></td></tr>";
-    } else if (key == "stroke-width" && writable) {
+    } else if (key == "stroke-width") {
       table +=
         '<tr class="style-row"><th><input type="text" value="' +
         key +
         '"' +
-        (!writable ? " readonly" : "") +
         " /></th>" +
         '<td><input type="number" min="0" step="0.1" value="' +
         properties[key] +
         '"' +
-        (!writable ? " readonly" : "") +
         " /></td></tr>";
-    } else if ((key == "stroke-opacity" || key == "fill-opacity") && writable) {
+    } else if (key == "stroke-opacity" || key == "fill-opacity") {
       table +=
         '<tr class="style-row"><th><input type="text" value="' +
         key +
         '"' +
-        (!writable ? " readonly" : "") +
         " /></th>" +
         '<td><input type="number" min="0" max="1" step="0.1" value="' +
         properties[key] +
         '"' +
-        (!writable ? " readonly" : "") +
         " /></td></tr>";
     } else {
       table +=
         '<tr><th><input type="text" value="' +
         key +
         '"' +
-        (!writable ? " readonly" : "") +
         " /></th>" +
         '<td><input type="text" value="' +
         properties[key] +
         '"' +
-        (!writable ? " readonly" : "") +
         " /></td></tr>";
     }
   }
@@ -378,10 +356,9 @@ function bindPopup(l) {
     '<table class="space-bottom0 marker-properties">' +
     table +
     "</table>" +
-    (writable
-      ? '<div class="add-row-button add fl col3"><span class="icon-plus"> Add row</div>' +
-        '<div class="fl text-right col9"><input type="checkbox" id="show-style" name="show-style" value="true" checked><label for="show-style">Show style properties</label></div>'
-      : "") +
+    //   ? '<div class="add-row-button add fl col3"><span class="icon-plus"> Add row</div>' +
+    //     '<div class="fl text-right col9"><input type="checkbox" id="show-style" name="show-style" value="true" checked><label for="show-style">Show style properties</label></div>'
+    //   : "") +
     "</div>" +
     "</div>" +
     '<div class="space-bottom2 tab col12">' +
@@ -395,16 +372,14 @@ function bindPopup(l) {
     "</div>" +
     "</div>";
 
-  var content =
-    tabs +
-    (writable
-      ? '<div class="clearfix col12 pad1 keyline-top">' +
-        '<div class="pill col6">' +
-        '<button class="save col6 major">Save</button> ' +
-        '<button class="minor col6 cancel">Cancel</button>' +
-        "</div>" +
-        '<button class="col6 text-right pad0 delete-invert"><span class="icon-remove-sign"></span> Delete feature</button></div>'
-      : "");
+  var content = tabs;
+  //   ? '<div class="clearfix col12 pad1 keyline-top">' +
+  //     '<div class="pill col6">' +
+  //     '<button class="save col6 major">Save</button> ' +
+  //     '<button class="minor col6 cancel">Cancel</button>' +
+  //     "</div>" +
+  //     '<button class="col6 text-right pad0 delete-invert"><span class="icon-remove-sign"></span> Delete feature</button></div>'
+  //  : "");
 
   l.bindPopup(
     L.popup(

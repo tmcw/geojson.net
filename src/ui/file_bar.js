@@ -1,74 +1,169 @@
-var L = require("leaflet");
-var d3 = require("d3");
-var keybinding = require("../../lib/d3.keybinding");
-var shpwrite = require("shp-write"),
-  clone = require("clone"),
-  geojson2dsv = require("geojson2dsv"),
-  togpx = require("togpx"),
-  topojson = require("topojson"),
-  saveAs = require("filesaver.js"),
-  tokml = require("tokml"),
-  githubBrowser = require("./file_browser.js"),
-  gistBrowser = require("@mapbox/gist-map-browser"),
-  geojsonNormalize = require("geojson-normalize"),
-  wellknown = require("wellknown");
+import React from "react";
+import L from "leaflet";
+import keybinding from "../../lib/d3.keybinding";
+import shpwrite from "shp-write";
+import wkx from "wkx";
+import clone from "clone";
+import geojson2dsv from "geojson2dsv";
+import togpx from "togpx";
+import topojson from "topojson";
+import { saveAs } from "file-saver";
+import tokml from "tokml";
+import githubBrowser from "./file_browser.js";
+import gistBrowser from "@mapbox/gist-map-browser";
+import geojsonNormalize from "geojson-normalize";
+import wellknown from "wellknown";
+import config from "../config.js";
+import readFile from "../lib/readfile";
+import geojsonRandom from "geojson-random";
+import geojsonExtent from "geojson-extent";
+import geojsonFlatten from "geojson-flatten";
 
-var share = require("./share"),
-  modal = require("./modal.js"),
-  flash = require("./flash"),
-  zoomextent = require("../lib/zoomextent"),
-  readFile = require("../lib/readfile"),
-  meta = require("../lib/meta.js"),
-  saver = require("../ui/saver.js"),
-  config = require("../config.js")(location.hostname);
+const shpSupport = typeof ArrayBuffer !== "undefined";
 
-/**
- * This module provides the file picking & status bar above the map interface.
- * It dispatches to source implementations that interface with specific
- * sources, like GitHub.
- */
-module.exports = function fileBar(context) {
-  var shpSupport = typeof ArrayBuffer !== "undefined";
-  var githubAPI = !!config.GithubAPI;
-  var githubBase = githubAPI
-    ? config.GithubAPI + "/api/v3"
-    : "https://api.github.com";
+const githubAPI = !!config.GithubAPI;
+const githubBase = githubAPI
+  ? config.GithubAPI + "/api/v3"
+  : "https://api.github.com";
 
-  var exportFormats = [
-    {
-      title: "GeoJSON",
-      action: downloadGeoJSON
-    },
-    {
-      title: "TopoJSON",
-      action: downloadTopo
-    },
-    {
-      title: "GPX",
-      action: downloadGPX
-    },
-    {
-      title: "CSV",
-      action: downloadDSV
-    },
-    {
-      title: "KML",
-      action: downloadKML
-    },
-    {
-      title: "WKT",
-      action: downloadWKT
-    }
-  ];
-
-  if (shpSupport) {
-    exportFormats.push({
-      title: "Shapefile",
-      action: downloadShp
-    });
+export default class FileBar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.fileInputRef = React.createRef();
   }
+  blindImport = () => {
+    this.fileInputRef.current.click();
+  };
+  onFileInputChange = e => {
+    const { setGeojson } = this.props;
+    const { files } = e.target;
+    if (!(files && files[0])) return;
+    readFile.readAsText(files[0], function(err, text) {
+      const result = readFile.readFile(files[0], text);
+      if (result instanceof Error) {
+      } else {
+        setGeojson(result);
+      }
+      if (files[0].path) {
+        // context.data.set({
+        //   path: files[0].path
+        // });
+      }
+    });
+  };
 
-  function bar(selection) {
+  downloadTopo = () => {
+    const { geojson } = this.props;
+    var content = JSON.stringify(
+      topojson.topology(
+        {
+          collection: clone(geojson)
+        },
+        {
+          "property-transform": function(properties, key, value) {
+            properties[key] = value;
+            return true;
+          }
+        }
+      )
+    );
+
+    this.download(content, "map.topojson", "text/plain;charset=utf-8");
+  };
+
+  download = (content, filename, type) => {
+    saveAs(
+      new Blob([content], {
+        type
+      }),
+      filename
+    );
+  };
+
+  downloadGPX = () => {
+    const { geojson } = this.props;
+    this.download(
+      togpx(geojson, {
+        creator: "geojson.net"
+      }),
+      "map.gpx",
+      "text/xml;charset=utf-8"
+    );
+  };
+
+  downloadGeoJSON = () => {
+    const { geojson } = this.props;
+    this.download(
+      JSON.stringify(geojson, null, 2),
+      "map.geojson",
+      "text/plain;charset=utf-8"
+    );
+  };
+
+  downloadDSV = () => {
+    const { geojson } = this.props;
+    this.download(
+      geojson2dsv(geojson),
+      "points.csv",
+      "text/plain;charset=utf-8"
+    );
+  };
+
+  downloadKML = () => {
+    const { geojson } = this.props;
+    this.download(tokml(geojson), "map.kml", "text/plain;charset=utf-8");
+  };
+
+  downloadShp = () => {
+    d3.select(".map").classed("loading", true);
+    try {
+      shpwrite.download(context.data.get("map"));
+    } finally {
+      d3.select(".map").classed("loading", false);
+    }
+  };
+
+  downloadWKT = () => {
+    var contentArray = [];
+    var features = context.data.get("map").features;
+    if (features.length === 0) return;
+    var content = features.map(wellknown.stringify).join("\n");
+    saveAs(
+      new Blob([content], {
+        type: "text/plain;charset=utf-8"
+      }),
+      "map.wkt"
+    );
+  };
+
+  render() {
+    const { setGeojson } = this.props;
+    const exportFormats = [
+      {
+        title: "GeoJSON",
+        action: this.downloadGeoJSON
+      },
+      {
+        title: "TopoJSON",
+        action: this.downloadTopo
+      },
+      {
+        title: "GPX",
+        action: this.downloadGPX
+      },
+      {
+        title: "CSV",
+        action: this.downloadDSV
+      },
+      {
+        title: "KML",
+        action: this.downloadKML
+      },
+      {
+        title: "WKT",
+        action: this.downloadWKT
+      }
+    ];
     var actions = [
       {
         title: "Save",
@@ -110,69 +205,113 @@ module.exports = function fileBar(context) {
           {
             title: "Clear",
             alt: "Delete all features from the map",
-            action: function() {
+            action: () => {
               if (
                 confirm(
                   "Are you sure you want to delete all features from this map?"
                 )
               ) {
-                meta.clear(context);
+                setGeojson({ type: "FeatureCollection", features: [] });
               }
             }
           },
           {
             title: "Random: Points",
             alt: "Add random points to your map",
-            action: function() {
+            action: () => {
+              const { setGeojson, geojson } = this.props;
               var response = prompt("Number of points (default: 100)");
               if (response === null) return;
               var count = parseInt(response, 10);
               if (isNaN(count)) count = 100;
-              meta.random(context, count, "point");
+              const fc = geojsonNormalize(geojson);
+              fc.features.push.apply(
+                fc.features,
+                geojsonRandom(count, "point").features
+              );
+              setGeojson(fc);
             }
           },
           {
             title: "Add bboxes",
             alt: "Add bounding box members to all applicable GeoJSON objects",
-            action: function() {
-              meta.bboxify(context);
+            action: () => {
+              const { setGeojson, geojson } = this.props;
+              setGeojson(geojsonExtent.bboxify(geojson));
             }
           },
           {
             title: "Flatten Multi Features",
             alt:
               "Flatten MultiPolygons, MultiLines, and GeometryCollections into simple geometries",
-            action: function() {
-              meta.flatten(context);
+            action: () => {
+              const { setGeojson, geojson } = this.props;
+              setGeojson(geojsonFlatten(geojson));
             }
           },
           {
             title: "Load encoded polyline",
             alt:
               "Decode and show an encoded polyline. Precision 5 is supported.",
-            action: function() {
-              meta.polyline(context);
+            action: () => {
+              const { setGeojson } = this.props;
+              const input = prompt("Enter your polyline");
+              try {
+                const decoded = polyline.toGeoJSON(input);
+                setGeojson(decoded);
+              } catch (e) {
+                alert("Sorry, we were unable to decode that polyline");
+              }
             }
           },
           {
             title: "Load WKB Base64 Encoded String",
             alt: "Decode and show WKX data",
-            action: function() {
-              meta.wkxBase64(context);
+            action: () => {
+              const input = prompt("Enter your Base64 encoded WKB/EWKB");
+              try {
+                // TODO: base64 in browser
+                var decoded = wkx.Geometry.parse(Buffer.from(input, "base64"));
+                setGeojson(decoded.toGeoJSON());
+                zoomextent(context);
+              } catch (e) {
+                console.error(e);
+                alert(
+                  "Sorry, we were unable to decode that Base64 encoded WKX data"
+                );
+              }
             }
           },
           {
             title: "Load WKB Hex Encoded String",
             alt: "Decode and show WKX data",
             action: function() {
-              meta.wkxHex(context);
+              const input = prompt("Enter your Hex encoded WKB/EWKB");
+              try {
+                var decoded = wkx.Geometry.parse(Buffer.from(input, "hex"));
+                setGeojson(decoded.toGeoJSON());
+                zoomextent(context);
+              } catch (e) {
+                console.error(e);
+                alert(
+                  "Sorry, we were unable to decode that Hex encoded WKX data"
+                );
+              }
             }
           },
           {
             title: "Load WKT String",
             alt: "Decode and show WKX data",
             action: function() {
-              meta.wkxString(context);
+              const input = prompt("Enter your WKT/EWKT String");
+              try {
+                var decoded = wkx.Geometry.parse(input);
+                setGeojson(decoded.toGeoJSON());
+                zoomextent(context);
+              } catch (e) {
+                console.error(e);
+                alert("Sorry, we were unable to decode that WKT data");
+              }
             }
           }
         ]
@@ -186,7 +325,7 @@ module.exports = function fileBar(context) {
           {
             title: "File",
             alt: "GeoJSON, TopoJSON, GTFS, KML, CSV, GPX and OSM XML supported",
-            action: blindImport
+            action: this.blindImport
           },
           {
             title: "GitHub",
@@ -227,473 +366,309 @@ module.exports = function fileBar(context) {
       actions.unshift({
         title: "Open",
         alt: "CSV, GTFS, KML, GPX, and other filetypes",
-        action: blindImport
+        action: this.blindImport
       });
     }
 
-    var items = selection
-      .append("div")
-      .attr("class", "inline")
-      .selectAll("div.item")
-      .data(actions);
+    return (
+      <div className="inline-flex">
+        {actions.map((item, i) => {
+          return (
+            <div
+              key={i}
+              style={{ zIndex: 999 }}
+              onClick={item.action}
+              className="db bn pv1 ph2 br2 br--top outline-0 disappear-child relative pointer black-50 hover-black f6"
+            >
+              {item.title}
+              {item.children ? (
+                <div
+                  className="child bg-white absolute w4"
+                  style={{
+                    top: 24
+                  }}
+                >
+                  {item.children.map((child, i) => {
+                    return (
+                      <div
+                        onClick={child.action}
+                        key={i}
+                        className={`bn pv1 ph2 outline-0 tl f6 db hover-bg-blue hover-white w-100 pointer`}
+                      >
+                        {child.title}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+        <input
+          type="file"
+          className="dn"
+          ref={this.fileInputRef}
+          onChange={this.onFileInputChange}
+        />
+      </div>
+    );
+  }
+}
 
-    items = items
-      .enter()
-      .append("div")
-      .attr("class", "item")
-      .merge(items);
+if (githubAPI) {
+  var filetype = name
+    .append("a")
+    .attr("target", "_blank")
+    .attr("class", "icon-file-alt");
 
-    var buttons = items
-      .append("a")
-      .attr("class", "parent")
-      .on("click", function(d) {
-        if (d.action) d.action.apply(this, d);
-      })
-      .text(function(d) {
-        return " " + d.title;
-      });
+  var filename = name
+    .append("span")
+    .attr("class", "filename")
+    .text("unsaved");
+}
 
-    items.each(function(d) {
-      if (!d.children) return;
-      d3
-        .select(this)
-        .append("div")
-        .attr("class", "children")
-        .call(submenu(d.children));
-    });
+function clickGistSave() {
+  context.data.set({ type: "gist" });
+  saver(context);
+}
 
-    var name = selection.append("div").attr("class", "name");
+function saveAction() {
+  saver(context);
+}
 
-    if (githubAPI) {
-      var filetype = name
-        .append("a")
-        .attr("target", "_blank")
-        .attr("class", "icon-file-alt");
+function sourceIcon(type) {
+  if (type == "github") return "icon-github";
+  else if (type == "gist") return "icon-github-alt";
+  else return "icon-file-alt";
+}
 
-      var filename = name
-        .append("span")
-        .attr("class", "filename")
-        .text("unsaved");
-    }
+function saveNoun(_) {
+  buttons
+    .filter(function(b) {
+      return b.title === "Save";
+    })
+    .select("span.title")
+    .text(_);
+}
 
-    function clickGistSave() {
-      if (d3.event) d3.event.preventDefault();
-      context.data.set({ type: "gist" });
-      saver(context);
-    }
+function clickGitHubOpen() {
+  if (!context.user.token())
+    return flash(context.container, "You must authenticate to use this API.");
 
-    function saveAction() {
-      if (d3.event) d3.event.preventDefault();
-      saver(context);
-    }
+  var m = modal(d3.select("div.geojsonio"));
 
-    function sourceIcon(type) {
-      if (type == "github") return "icon-github";
-      else if (type == "gist") return "icon-github-alt";
-      else return "icon-file-alt";
-    }
+  m.select(".m").attr("class", "modal-splash modal col6");
 
-    function saveNoun(_) {
-      buttons
-        .filter(function(b) {
-          return b.title === "Save";
-        })
-        .select("span.title")
-        .text(_);
-    }
+  m
+    .select(".content")
+    .append("div")
+    .attr("class", "header pad2 fillD")
+    .append("h1")
+    .text("GitHub");
 
-    function submenu(children) {
-      return function(selection) {
-        selection
-          .selectAll("a")
-          .data(children)
-          .enter()
-          .append("a")
-          .attr("title", function(d) {
-            if (
-              d.title == "File" ||
-              d.title == "GitHub" ||
-              d.title == "Gist" ||
-              d.title == "Add map layer" ||
-              d.title == "Zoom to features" ||
-              d.title == "Clear" ||
-              d.title == "Random: Points" ||
-              d.title == "Add bboxes" ||
-              d.title == "Flatten Multi Features"
-            )
-              return d.alt;
-          })
-          .text(function(d) {
-            return d.title;
-          })
-          .on("click", function(d) {
-            d.action.apply(this, d);
-          });
-      };
-    }
-
-    context.dispatch.on("change.filebar", onchange);
-
-    function clickGitHubOpen() {
-      if (!context.user.token())
-        return flash(
-          context.container,
-          "You must authenticate to use this API."
-        );
-
-      var m = modal(d3.select("div.geojsonio"));
-
-      m.select(".m").attr("class", "modal-splash modal col6");
-
-      m
-        .select(".content")
-        .append("div")
-        .attr("class", "header pad2 fillD")
-        .append("h1")
-        .text("GitHub");
-
-      githubBrowser(context.user.token(), false, githubBase)
-        .open()
-        .onclick(function(d) {
-          if (!d || !d.length) return;
-          var last = d[d.length - 1];
-          if (!last.path) {
-            throw new Error("last is invalid: " + JSON.stringify(last));
-          }
-          if (!last.path.match(/\.(geo)?json/i)) {
-            return alert("only GeoJSON files are supported from GitHub");
-          }
-          if (last.type === "blob") {
-            githubBrowser.request(
-              "/repos/" + d[1].full_name + "/git/blobs/" + last.sha,
-              function(err, blob) {
-                d.content = JSON.parse(
-                  decodeURIComponent(
-                    Array.prototype.map
-                      .call(atob(blob[0].content), function(c) {
-                        return (
-                          "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
-                        );
-                      })
-                      .join("")
-                  )
-                );
-                context.data.parse(d);
-                zoomextent(context);
-                m.close();
-              }
+  githubBrowser(context.user.token(), false, githubBase)
+    .open()
+    .onclick(function(d) {
+      if (!d || !d.length) return;
+      var last = d[d.length - 1];
+      if (!last.path) {
+        throw new Error("last is invalid: " + JSON.stringify(last));
+      }
+      if (!last.path.match(/\.(geo)?json/i)) {
+        return alert("only GeoJSON files are supported from GitHub");
+      }
+      if (last.type === "blob") {
+        githubBrowser.request(
+          "/repos/" + d[1].full_name + "/git/blobs/" + last.sha,
+          function(err, blob) {
+            d.content = JSON.parse(
+              decodeURIComponent(
+                Array.prototype.map
+                  .call(atob(blob[0].content), function(c) {
+                    return (
+                      "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+                    );
+                  })
+                  .join("")
+              )
             );
+            context.data.parse(d);
+            zoomextent(context);
+            m.close();
           }
-        })
-        .appendTo(
-          m
-            .select(".content")
-            .append("div")
-            .attr("class", "repos pad2")
-            .node()
         );
-    }
-
-    function clickGitHubSave() {
-      if (!context.user.token())
-        return flash(
-          context.container,
-          "You must authenticate to use this API."
-        );
-
-      var m = modal(d3.select("div.geojsonio"));
-
-      m.select(".m").attr("class", "modal-splash modal col6");
-
+      }
+    })
+    .appendTo(
       m
         .select(".content")
         .append("div")
-        .attr("class", "header pad2 fillD")
-        .append("h1")
-        .text("GitHub");
+        .attr("class", "repos pad2")
+        .node()
+    );
+}
 
-      githubBrowser(context.user.token(), true, githubBase)
-        .open()
-        .onclick(function(d) {
-          if (!d || !d.length) return;
-          var last = d[d.length - 1];
-          var pathparts;
-          var partial;
+function clickGitHubSave() {
+  if (!context.user.token())
+    return flash(context.container, "You must authenticate to use this API.");
 
-          // New file
-          if (last.type === "new") {
-            var filename = prompt("New file name");
-            if (!filename) {
-              m.close();
-              return;
-            }
-            pathparts = d.slice(3);
-            pathparts.pop();
-            pathparts.push({ path: filename });
-            partial = pathparts
-              .map(function(p) {
-                return p.path;
-              })
-              .join("/");
-            context.data.set({
-              source: {
-                url:
-                  githubBase +
-                  "/repos/" +
-                  d[0].login +
-                  "/" +
-                  d[1].name +
-                  "/contents/" +
-                  partial +
-                  "?ref=" +
-                  d[2].name
-              },
-              type: "github",
-              meta: {
-                branch: d[2].name,
-                login: d[0].login,
-                repo: d[1].name
-              }
-            });
-            context.data.set({ newpath: partial + filename });
-            m.close();
-            saver(context);
-          }
-          // Update a file
-          else if (last.type === "blob") {
-            // Build the path
-            pathparts = d.slice(3);
-            partial = pathparts
-              .map(function(p) {
-                return p.path;
-              })
-              .join("/");
+  var m = modal(d3.select("div.geojsonio"));
 
-            context.data.set({
-              source: {
-                url:
-                  githubBase +
-                  "/repos/" +
-                  d[0].login +
-                  "/" +
-                  d[1].name +
-                  "/contents/" +
-                  partial +
-                  "?ref=" +
-                  d[2].name,
-                sha: last.sha
-              },
-              type: "github",
-              meta: {
-                branch: d[2].name,
-                login: d[0].login,
-                repo: d[1].name
-              }
-            });
-            m.close();
-            saver(context);
-          }
-        })
-        .appendTo(
-          m
-            .select(".content")
-            .append("div")
-            .attr("class", "repos pad2")
-            .node()
-        );
-    }
+  m.select(".m").attr("class", "modal-splash modal col6");
 
-    function clickGist() {
-      if (!context.user.token())
-        return flash(
-          context.container,
-          "You must authenticate to use this API."
-        );
+  m
+    .select(".content")
+    .append("div")
+    .attr("class", "header pad2 fillD")
+    .append("h1")
+    .text("GitHub");
 
-      var m = modal(d3.select("div.geojsonio"));
+  githubBrowser(context.user.token(), true, githubBase)
+    .open()
+    .onclick(function(d) {
+      if (!d || !d.length) return;
+      var last = d[d.length - 1];
+      var pathparts;
+      var partial;
 
-      m.select(".m").attr("class", "modal-splash modal col6");
-
-      gistBrowser(context.user.token(), githubBase)
-        .open()
-        .onclick(function(d) {
-          context.data.parse(d);
-          zoomextent(context);
+      // New file
+      if (last.type === "new") {
+        var filename = prompt("New file name");
+        if (!filename) {
           m.close();
-        })
-        .appendTo(
-          m
-            .select(".content")
-            .append("div")
-            .attr("class", "repos pad2")
-            .node()
-        );
-    }
-
-    function onchange(d) {
-      var data = d.obj,
-        type = data.type,
-        path = data.path;
-      if (githubAPI)
-        filename
-          .text(path ? path : "unsaved")
-          .classed("deemphasize", context.data.dirty);
-      if (githubAPI)
-        filetype.attr("href", data.url).attr("class", sourceIcon(type));
-      saveNoun(type == "github" ? "Commit" : "Save");
-    }
-
-    function blindImport() {
-      var put = d3
-        .select("body")
-        .append("input")
-        .attr("type", "file")
-        .style("visibility", "hidden")
-        .style("position", "absolute")
-        .style("height", "0")
-        .on("change", function() {
-          var files = this.files;
-          if (!(files && files[0])) return;
-          readFile.readAsText(files[0], function(err, text) {
-            readFile.readFile(files[0], text, onImport);
-            if (files[0].path) {
-              context.data.set({
-                path: files[0].path
-              });
-            }
-          });
-          put.remove();
+          return;
+        }
+        pathparts = d.slice(3);
+        pathparts.pop();
+        pathparts.push({ path: filename });
+        partial = pathparts
+          .map(function(p) {
+            return p.path;
+          })
+          .join("/");
+        context.data.set({
+          source: {
+            url:
+              githubBase +
+              "/repos/" +
+              d[0].login +
+              "/" +
+              d[1].name +
+              "/contents/" +
+              partial +
+              "?ref=" +
+              d[2].name
+          },
+          type: "github",
+          meta: {
+            branch: d[2].name,
+            login: d[0].login,
+            repo: d[1].name
+          }
         });
-      put.node().click();
-    }
-
-    function onImport(err, gj, warning) {
-      if (err) {
-        if (err.message) {
-          flash(context.container, err.message).classed("error", "true");
-        }
-        return;
+        context.data.set({ newpath: partial + filename });
+        m.close();
+        saver(context);
       }
-      gj = geojsonNormalize(gj);
-      if (gj) {
-        context.data.mergeFeatures(gj.features);
-        if (warning) {
-          flash(context.container, warning.message);
-        } else {
-          flash(
-            context.container,
-            "Imported " + gj.features.length + " features."
-          ).classed("success", "true");
-        }
-        zoomextent(context);
+      // Update a file
+      else if (last.type === "blob") {
+        // Build the path
+        pathparts = d.slice(3);
+        partial = pathparts
+          .map(function(p) {
+            return p.path;
+          })
+          .join("/");
+
+        context.data.set({
+          source: {
+            url:
+              githubBase +
+              "/repos/" +
+              d[0].login +
+              "/" +
+              d[1].name +
+              "/contents/" +
+              partial +
+              "?ref=" +
+              d[2].name,
+            sha: last.sha
+          },
+          type: "github",
+          meta: {
+            branch: d[2].name,
+            login: d[0].login,
+            repo: d[1].name
+          }
+        });
+        m.close();
+        saver(context);
       }
+    })
+    .appendTo(
+      m
+        .select(".content")
+        .append("div")
+        .attr("class", "repos pad2")
+        .node()
+    );
+}
+
+function clickGist() {
+  if (!context.user.token())
+    return flash(context.container, "You must authenticate to use this API.");
+
+  var m = modal(d3.select("div.geojsonio"));
+
+  m.select(".m").attr("class", "modal-splash modal col6");
+
+  gistBrowser(context.user.token(), githubBase)
+    .open()
+    .onclick(function(d) {
+      context.data.parse(d);
+      zoomextent(context);
+      m.close();
+    })
+    .appendTo(
+      m
+        .select(".content")
+        .append("div")
+        .attr("class", "repos pad2")
+        .node()
+    );
+}
+
+function onchange(d) {
+  var data = d.obj,
+    type = data.type,
+    path = data.path;
+  if (githubAPI)
+    filename
+      .text(path ? path : "unsaved")
+      .classed("deemphasize", context.data.dirty);
+  if (githubAPI)
+    filetype.attr("href", data.url).attr("class", sourceIcon(type));
+  saveNoun(type == "github" ? "Commit" : "Save");
+}
+
+function onImport(err, gj, warning) {
+  if (err) {
+    if (err.message) {
+      flash(context.container, err.message).classed("error", "true");
     }
-
-    d3.select(document).call(
-      keybinding("file_bar")
-        .on("⌘+o", function() {
-          blindImport();
-          d3.event.preventDefault();
-        })
-        .on("⌘+s", saveAction)
-    );
+    return;
   }
-
-  function downloadTopo() {
-    var content = JSON.stringify(
-      topojson.topology(
-        {
-          collection: clone(context.data.get("map"))
-        },
-        { "property-transform": allProperties }
-      )
-    );
-
-    saveAs(
-      new Blob([content], {
-        type: "text/plain;charset=utf-8"
-      }),
-      "map.topojson"
-    );
-  }
-
-  function downloadGPX() {
-    var content = togpx(clone(context.data.get("map")), {
-      creator: "geojson.net"
-    });
-
-    saveAs(
-      new Blob([content], {
-        type: "text/xml;charset=utf-8"
-      }),
-      "map.gpx"
-    );
-  }
-
-  function downloadGeoJSON() {
-    if (d3.event) d3.event.preventDefault();
-    var content = JSON.stringify(context.data.get("map"));
-    var meta = context.data.get("meta");
-    saveAs(
-      new Blob([content], {
-        type: "text/plain;charset=utf-8"
-      }),
-      (meta && meta.name) || "map.geojson"
-    );
-  }
-
-  function downloadDSV() {
-    if (d3.event) d3.event.preventDefault();
-    var content = geojson2dsv(context.data.get("map"));
-    saveAs(
-      new Blob([content], {
-        type: "text/plain;charset=utf-8"
-      }),
-      "points.csv"
-    );
-  }
-
-  function downloadKML() {
-    if (d3.event) d3.event.preventDefault();
-    var content = tokml(context.data.get("map"));
-    var meta = context.data.get("meta");
-    saveAs(
-      new Blob([content], {
-        type: "text/plain;charset=utf-8"
-      }),
-      "map.kml"
-    );
-  }
-
-  function downloadShp() {
-    if (d3.event) d3.event.preventDefault();
-    d3.select(".map").classed("loading", true);
-    try {
-      shpwrite.download(context.data.get("map"));
-    } finally {
-      d3.select(".map").classed("loading", false);
+  gj = geojsonNormalize(gj);
+  if (gj) {
+    context.data.mergeFeatures(gj.features);
+    if (warning) {
+      flash(context.container, warning.message);
+    } else {
+      flash(
+        context.container,
+        "Imported " + gj.features.length + " features."
+      ).classed("success", "true");
     }
+    zoomextent(context);
   }
-
-  function downloadWKT() {
-    if (d3.event) d3.event.preventDefault();
-    var contentArray = [];
-    var features = context.data.get("map").features;
-    if (features.length === 0) return;
-    var content = features.map(wellknown.stringify).join("\n");
-    var meta = context.data.get("meta");
-    saveAs(
-      new Blob([content], {
-        type: "text/plain;charset=utf-8"
-      }),
-      "map.wkt"
-    );
-  }
-
-  function allProperties(properties, key, value) {
-    properties[key] = value;
-    return true;
-  }
-
-  return bar;
-};
+}
