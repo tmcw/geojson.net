@@ -1,4 +1,6 @@
-module.exports = function(hostname) {
+export default "https://geojsonnet-local-auth.now.sh";
+
+/*
   // Settings for geojson.net
   if (hostname === "geojson.net") {
     return {
@@ -13,3 +15,4 @@ module.exports = function(hostname) {
     };
   }
 };
+*/

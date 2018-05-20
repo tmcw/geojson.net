@@ -1,3 +1,4 @@
+import querystring from "querystring";
 import React from "react";
 import ReactDOM from "react-dom";
 import Help from "./panel/help";
@@ -12,6 +13,15 @@ import { createHttpLink } from "apollo-link-http";
 import { ApolloLink } from "apollo-link";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { ApolloProvider } from "react-apollo";
+
+const {access_token}  = querystring.parse(location.search.replace(/^\?/, ''));
+
+console.log(access_token);
+
+if (access_token) {
+  localStorage.setItem("githubToken", access_token);
+  location.replace("/");
+}
 
 const middlewareLink = new ApolloLink((operation, forward) => {
   operation.setContext({
