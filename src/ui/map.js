@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import L from "leaflet";
 import "leaflet-editable";
 import marker from "../map/marker";
@@ -7,12 +8,7 @@ import geojsonRewind from "geojson-rewind";
 import simplestyle from "./simplestyle";
 var makiValues = require("../../data/maki.json");
 import LGeo from "leaflet-geodesy";
-// require("qs-hash");
-// require("../lib/custom_hash.js");
-//
-// var popup = require("../lib/popup"),
-//   escape = require("escape-html"),
-//
+
 let maki = "";
 for (var i = 0; i < makiValues.length; i++) {
   maki += '<option value="' + makiValues[i].icon + '">';
@@ -51,6 +47,7 @@ export default class Map extends React.Component {
     map.addLayer(mapLayer);
     layers.find(({ id }) => id === layer).layer.addTo(baseLayerGroup);
     map.on("editable:drawing:commit", this.updateFromMap);
+    map.on("layeradd", this.onLayerAdd);
     this.setState({
       map,
       baseLayerGroup,
@@ -61,6 +58,29 @@ export default class Map extends React.Component {
     const { mapLayer } = this.state;
     mapLayer.addLayer(e.layer);
     this.updateFromMap();
+  };
+  onLayerAdd = e => {
+    const { layer } = e;
+    if ("bindPopup" in layer) {
+      layer.bindPopup(
+        L.popup(
+          {
+            closeButton: false,
+            maxWidth: 500,
+            maxHeight: 400,
+            autoPanPadding: [5, 45],
+            classname: "geojsonnet-feature"
+          },
+          layer
+        ).setContent(this.makePopup(layer))
+      );
+    }
+  };
+  makePopup = layer => {
+    const div = document.createElement("div");
+    const popup = ReactDOM.render(<div>Layer</div>, div);
+    div.className = "ispopup";
+    return div;
   };
   updateFromMap = () => {
     const { setGeojson } = this.props;
