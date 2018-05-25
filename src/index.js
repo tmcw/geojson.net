@@ -7,6 +7,7 @@ import FileBar from "./ui/file_bar";
 import ModeButtons from "./ui/mode_buttons";
 import User from "./ui/user";
 import Map from "./ui/map";
+import GithubModal from "./ui/github_modal";
 import Panel from "./panel/index";
 import ApolloClient from "apollo-client";
 import { createHttpLink } from "apollo-link-http";
@@ -14,7 +15,7 @@ import { ApolloLink } from "apollo-link";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { ApolloProvider } from "react-apollo";
 
-const {access_token}  = querystring.parse(location.search.replace(/^\?/, ''));
+const { access_token } = querystring.parse(location.search.replace(/^\?/, ""));
 
 console.log(access_token);
 
@@ -58,10 +59,14 @@ class App extends React.Component {
   state = {
     mode: "code",
     layer: "mapbox",
+    githubModal: false,
     geojson: { type: "FeatureCollection", features: [] }
   };
   setMode = mode => {
     this.setState({ mode });
+  };
+  toggleGithubModal = () => {
+    this.setState({ githubModal });
   };
   setLayer = layer => {
     this.setState({ layer });
@@ -70,14 +75,18 @@ class App extends React.Component {
     this.setState({ geojson });
   };
   render() {
-    const { geojson, layer, map, mode } = this.state;
+    const { geojson, layer, map, mode, githubModal } = this.state;
     const { setGeojson, setLayer, setMode } = this;
     return (
       <ApolloProvider client={client}>
         <div className="vh-100 flex sans-serif black-70">
-          <div className="w-50 flex flex-column">
+          <div className="w-50 flex flex-column z-0">
             <div className="bg-white pt2 ph2 flex justify-between">
-              <FileBar geojson={geojson} setGeojson={setGeojson} />
+              <FileBar
+                geojson={geojson}
+                setGeojson={setGeojson}
+                toggleGithubModal={this.toggleGithubModal}
+              />
             </div>
             <Map layer={layer} geojson={geojson} setGeojson={setGeojson} />
             <LayerSwitch layer={layer} setLayer={setLayer} />
@@ -94,6 +103,7 @@ class App extends React.Component {
             </div>
             <Panel mode={mode} geojson={geojson} setGeojson={setGeojson} />
           </div>
+          {githubModal && <GithubModal />}
         </div>
       </ApolloProvider>
     );

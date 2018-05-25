@@ -63,6 +63,14 @@
     opacity:1;
     margin-left:35px;
 }
+
+dialog {
+  z-index: 999;
+}
+dialog::backdrop {
+  background: rgba(0,0,0,0.9);
+  z-index: 998;
+}
   </style>
   <link rel='icon' type='image/x-icon' href='./img/favicon.png' />
   <meta name='description' content='simply edit geojson map data' />

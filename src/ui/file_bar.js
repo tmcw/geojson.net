@@ -52,7 +52,6 @@ export default class FileBar extends React.Component {
       }
     });
   };
-
   downloadTopo = () => {
     const { geojson } = this.props;
     var content = JSON.stringify(
@@ -183,28 +182,6 @@ export default class FileBar extends React.Component {
         title: "Meta",
         action: function() {},
         children: [
-          // TODO
-          // {
-          //   title: "Add map layer",
-          //   alt: "Add a custom tile layer",
-          //   action: function() {
-          //     var layerURL = prompt(
-          //       "Layer URL \n(https://tile.stamen.com/watercolor/{z}/{x}/{y}.jpg)"
-          //     );
-          //     if (layerURL === null) return;
-          //     var layerName = prompt("Layer name");
-          //     if (layerName === null) return;
-          //     meta.adduserlayer(context, layerURL, layerName);
-          //   }
-          // },
-          // TODO
-          // {
-          //   title: "Zoom to features",
-          //   alt: "Zoom to the extent of all features",
-          //   action: function() {
-          //     meta.zoomextent(context);
-          //   }
-          // },
           {
             title: "Clear",
             alt: "Delete all features from the map",
@@ -322,57 +299,40 @@ export default class FileBar extends React.Component {
       }
     ];
 
-    if (githubAPI) {
-      actions.unshift({
-        title: "Open",
-        children: [
-          {
-            title: "File",
-            alt: "GeoJSON, TopoJSON, GTFS, KML, CSV, GPX and OSM XML supported",
-            action: this.blindImport
-          },
-          {
-            title: "GitHub",
-            alt: "GeoJSON files in GitHub Repositories",
-            authenticated: true,
-            action: clickGitHubOpen
-          },
-          {
-            title: "Gist",
-            alt: "GeoJSON files in GitHub Gists",
-            authenticated: true,
-            action: clickGist
-          }
-        ]
-      });
-      actions[1].children.unshift(
+    actions.unshift({
+      title: "Open",
+      children: [
+        {
+          title: "File",
+          alt: "GeoJSON, TopoJSON, GTFS, KML, CSV, GPX and OSM XML supported",
+          action: this.blindImport
+        },
         {
           title: "GitHub",
           alt: "GeoJSON files in GitHub Repositories",
           authenticated: true,
-          action: clickGitHubSave
+          action: this.props.toggleGithubModal
         },
         {
           title: "Gist",
           alt: "GeoJSON files in GitHub Gists",
           authenticated: true,
-          action: clickGistSave
+          action: () => {}
         }
-      );
+      ]
+    });
 
-      actions.splice(3, 0, {
-        title: "Share",
-        action: function() {
-          context.container.call(share(context));
-        }
-      });
-    } else {
-      actions.unshift({
-        title: "Open",
-        alt: "CSV, GTFS, KML, GPX, and other filetypes",
-        action: this.blindImport
-      });
-    }
+    actions.splice(3, 0, {
+      title: "Share",
+      action: function() {
+        context.container.call(share(context));
+      }
+    });
+    actions.unshift({
+      title: "Open",
+      alt: "CSV, GTFS, KML, GPX, and other filetypes",
+      action: this.blindImport
+    });
 
     return (
       <div className="inline-flex">
@@ -453,193 +413,6 @@ function saveNoun(_) {
     })
     .select("span.title")
     .text(_);
-}
-
-function clickGitHubOpen() {
-  if (!context.user.token())
-    return flash(context.container, "You must authenticate to use this API.");
-
-  var m = modal(d3.select("div.geojsonio"));
-
-  m.select(".m").attr("class", "modal-splash modal col6");
-
-  m
-    .select(".content")
-    .append("div")
-    .attr("class", "header pad2 fillD")
-    .append("h1")
-    .text("GitHub");
-
-  githubBrowser(context.user.token(), false, githubBase)
-    .open()
-    .onclick(function(d) {
-      if (!d || !d.length) return;
-      var last = d[d.length - 1];
-      if (!last.path) {
-        throw new Error("last is invalid: " + JSON.stringify(last));
-      }
-      if (!last.path.match(/\.(geo)?json/i)) {
-        return alert("only GeoJSON files are supported from GitHub");
-      }
-      if (last.type === "blob") {
-        githubBrowser.request(
-          "/repos/" + d[1].full_name + "/git/blobs/" + last.sha,
-          function(err, blob) {
-            d.content = JSON.parse(
-              decodeURIComponent(
-                Array.prototype.map
-                  .call(atob(blob[0].content), function(c) {
-                    return (
-                      "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
-                    );
-                  })
-                  .join("")
-              )
-            );
-            context.data.parse(d);
-            zoomextent(context);
-            m.close();
-          }
-        );
-      }
-    })
-    .appendTo(
-      m
-        .select(".content")
-        .append("div")
-        .attr("class", "repos pad2")
-        .node()
-    );
-}
-
-function clickGitHubSave() {
-  if (!context.user.token())
-    return flash(context.container, "You must authenticate to use this API.");
-
-  var m = modal(d3.select("div.geojsonio"));
-
-  m.select(".m").attr("class", "modal-splash modal col6");
-
-  m
-    .select(".content")
-    .append("div")
-    .attr("class", "header pad2 fillD")
-    .append("h1")
-    .text("GitHub");
-
-  githubBrowser(context.user.token(), true, githubBase)
-    .open()
-    .onclick(function(d) {
-      if (!d || !d.length) return;
-      var last = d[d.length - 1];
-      var pathparts;
-      var partial;
-
-      // New file
-      if (last.type === "new") {
-        var filename = prompt("New file name");
-        if (!filename) {
-          m.close();
-          return;
-        }
-        pathparts = d.slice(3);
-        pathparts.pop();
-        pathparts.push({ path: filename });
-        partial = pathparts
-          .map(function(p) {
-            return p.path;
-          })
-          .join("/");
-        context.data.set({
-          source: {
-            url:
-              githubBase +
-              "/repos/" +
-              d[0].login +
-              "/" +
-              d[1].name +
-              "/contents/" +
-              partial +
-              "?ref=" +
-              d[2].name
-          },
-          type: "github",
-          meta: {
-            branch: d[2].name,
-            login: d[0].login,
-            repo: d[1].name
-          }
-        });
-        context.data.set({ newpath: partial + filename });
-        m.close();
-        saver(context);
-      }
-      // Update a file
-      else if (last.type === "blob") {
-        // Build the path
-        pathparts = d.slice(3);
-        partial = pathparts
-          .map(function(p) {
-            return p.path;
-          })
-          .join("/");
-
-        context.data.set({
-          source: {
-            url:
-              githubBase +
-              "/repos/" +
-              d[0].login +
-              "/" +
-              d[1].name +
-              "/contents/" +
-              partial +
-              "?ref=" +
-              d[2].name,
-            sha: last.sha
-          },
-          type: "github",
-          meta: {
-            branch: d[2].name,
-            login: d[0].login,
-            repo: d[1].name
-          }
-        });
-        m.close();
-        saver(context);
-      }
-    })
-    .appendTo(
-      m
-        .select(".content")
-        .append("div")
-        .attr("class", "repos pad2")
-        .node()
-    );
-}
-
-function clickGist() {
-  if (!context.user.token())
-    return flash(context.container, "You must authenticate to use this API.");
-
-  var m = modal(d3.select("div.geojsonio"));
-
-  m.select(".m").attr("class", "modal-splash modal col6");
-
-  gistBrowser(context.user.token(), githubBase)
-    .open()
-    .onclick(function(d) {
-      context.data.parse(d);
-      zoomextent(context);
-      m.close();
-    })
-    .appendTo(
-      m
-        .select(".content")
-        .append("div")
-        .attr("class", "repos pad2")
-        .node()
-    );
 }
 
 function onchange(d) {

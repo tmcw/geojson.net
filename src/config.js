@@ -1,4 +1,5 @@
-export default "https://geojsonnet-local-auth.now.sh";
+export default "http://localhost:3000";
+// export default "https://geojsonnet-local-auth.now.sh";
 
 /*
   // Settings for geojson.net
