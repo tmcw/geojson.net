@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import L from "leaflet";
+require('leaflet/dist/leaflet.css')
 import "leaflet-editable";
 import marker from "../map/marker";
 import { layers } from "../layers";
@@ -117,38 +118,37 @@ export default class Map extends React.Component {
   };
   render() {
     return (
-      <div className="flex-auto flex">
-        <div className="flex-auto" ref={this.mapRef} />
-        <div className="bl b--black-10 bg-silver flex flex-column">
-          <button
-            className="bg-white pa2 b--black-10 bb tl"
-            onClick={this.startLine}
-          >
-            line
-          </button>
-          <button
-            className="bg-white pa2 b--black-10 bb tl"
-            onClick={this.startPolygon}
-          >
-            polygon
-          </button>
-          <button
-            className="bg-white pa2 b--black-10 bb tl"
-            onClick={this.startRectangle}
-          >
-            rectangle
-          </button>
-          <button
-            className="bg-white pa2 b--black-10 bb tl"
-            onClick={this.startMarker}
-          >
-            marker
-          </button>
-        </div>
-      </div>
-    );
+        <div id="map" ref={this.mapRef} />
+      );
   }
 }
+
+// <div className="bl b--black-10 bg-silver flex flex-column">
+//           <button
+//             className="bg-white pa2 b--black-10 bb tl"
+//             onClick={this.startLine}
+//           >
+//             line
+//           </button>
+//           <button
+//             className="bg-white pa2 b--black-10 bb tl"
+//             onClick={this.startPolygon}
+//           >
+//             polygon
+//           </button>
+//           <button
+//             className="bg-white pa2 b--black-10 bb tl"
+//             onClick={this.startRectangle}
+//           >
+//             rectangle
+//           </button>
+//           <button
+//             className="bg-white pa2 b--black-10 bb tl"
+//             onClick={this.startMarker}
+//           >
+//             marker
+//           </button>
+//         </div>
 function layerToGeoJSON(layer) {
   var features = [];
   layer.eachLayer(collect);

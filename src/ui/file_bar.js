@@ -20,6 +20,11 @@ import geojsonRandom from "geojson-random";
 import geojsonExtent from "geojson-extent";
 import geojsonFlatten from "geojson-flatten";
 
+import {Button, Menu, Icon } from 'antd';
+
+const SubMenu = Menu.SubMenu;
+const MenuItemGroup = Menu.ItemGroup;
+
 const shpSupport = typeof ArrayBuffer !== "undefined";
 
 const githubAPI = !!config.GithubAPI;
@@ -299,6 +304,17 @@ export default class FileBar extends React.Component {
       }
     ];
 
+    const importFormats = [
+      {
+        title: "GeoJSON",
+        action: this.blindImport
+      },
+      {
+        title: "TopoJSON",
+        action: this.blindImport
+      }
+    ]
+
     actions.unshift({
       title: "Open",
       children: [
@@ -335,49 +351,46 @@ export default class FileBar extends React.Component {
     });
 
     return (
-      <div className="inline-flex">
-        {actions.map((item, i) => {
-          return (
-            <div
-              key={i}
-              style={{ zIndex: 999 }}
-              onClick={item.action}
-              className="db bn pv1 ph2 br2 br--top outline-0 disappear-child relative pointer black-50 hover-black f6"
-            >
-              {item.title}
-              {item.children ? (
-                <div
-                  className="child bg-white absolute w4"
-                  style={{
-                    top: 24
-                  }}
-                >
-                  {item.children.map((child, i) => {
-                    return (
-                      <div
-                        onClick={child.action}
-                        key={i}
-                        className={`bn pv1 ph2 outline-0 tl f6 db hover-bg-blue hover-white w-100 pointer`}
-                      >
-                        {child.title}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
-        <input
-          type="file"
-          className="dn"
-          ref={this.fileInputRef}
-          onChange={this.onFileInputChange}
-        />
-      </div>
+      <Menu mode="horizontal" className="mainMenu">
+        <Menu.Item key="signin">
+          <Button type="primary" icon="github">Login</Button>
+        </Menu.Item>
+  
+        <SubMenu 
+          title={<span><Icon type="file-add" />Load Data</span>}
+          children={
+            <Menu>
+              {importFormats.map((item, i) => {
+                return (<Menu.Item onClick={item.action} key={i}>{item.title}</Menu.Item>)
+              })}
+            </Menu>
+          }
+          key="load">
+        </SubMenu>
+
+        <SubMenu 
+          title={<span><Icon type="save" />Save Data</span>}
+          children={
+            <Menu>
+              {exportFormats.map((item, i) => {
+                return (<Menu.Item onClick={item.action} key={i}>{item.title}</Menu.Item>)
+              })}
+            </Menu>
+          }
+          key="save">
+        </SubMenu>
+      </Menu>
+
     );
   }
 }
+// THIS IS REQUIRED FOR THE LOADING DATA TO WORK
+//         <input
+//           type="file"
+//           className="dn"
+//           ref={this.fileInputRef}
+//           onChange={this.onFileInputChange}
+//         />
 
 if (githubAPI) {
   var filetype = name
