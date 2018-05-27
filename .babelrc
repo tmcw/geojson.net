@@ -1,4 +1,10 @@
 {
-  "plugins": ["transform-class-properties"],
+  "plugins": [
+    ["transform-class-properties"],
+    ["import", {
+      "libraryName": "antd",
+      "style": "css"
+    }]
+  ],
   "presets": ["env", "react"]
 }

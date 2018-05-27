@@ -1,0 +1,73 @@
+#root, .App, .container, #geojsonio {
+  height: 100%;
+}
+
+.ant-btn-primary, .ant-tabs-ink-bar  {
+  background-color: #27B8D3;
+  border-color: #27B8D3;
+}
+
+.ant-menu-horizontal > .ant-menu-item:hover, .ant-menu-horizontal > .ant-menu-submenu:hover, .ant-menu-horizontal > .ant-menu-item-active, .ant-menu-horizontal > .ant-menu-submenu-active, .ant-menu-horizontal > .ant-menu-item-open, .ant-menu-horizontal > .ant-menu-submenu-open, .ant-menu-horizontal > .ant-menu-item-selected, .ant-menu-horizontal > .ant-menu-submenu-selected {
+  border-color: #27B8D3;
+}
+
+.ant-menu-item-active, .ant-menu:not(.ant-menu-inline) .ant-menu-submenu-open, .ant-menu-submenu-active, .ant-menu-submenu-title:hover {
+  color: #27B8D3;
+}
+
+.ant-tabs-nav .ant-tabs-tab-active {
+    color: #54c6db;
+  }
+
+.sidebar{
+ height: 100%;
+ padding: 5px 20px 20px 20px;
+ background-color: #F8F8F8;
+}
+
+.mapArea{
+  height: 100%;
+}
+
+.map{
+  background: #e8e8e8;
+  height: 100%;
+}
+
+#map {
+  height: calc(100% - 48px);
+  width: 100%;
+}
+
+.ant-menu-item .signinIcon{
+  font-size: 24px;
+  margin-right: 0px;
+}
+.mainMenu{
+  background-color: #F8F8F8;
+}
+
+.ant-menu-horizontal > .ant-menu-item, .ant-menu-horizontal > .ant-menu-submenu {
+  color: #1D1C2C;
+}
+
+.mapIcons {
+    z-index: 10000;
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    }
+.mapIcons .ant-btn {
+  margin-bottom: 10px;
+  background-color: #6a798c;
+  border-color: #6a798c;
+}
+
+.ant-btn-primary:hover, .ant-btn-primary:focus {
+  background-color: #6A798C;
+  border-color: #6A798C;
+}
+
+.dn {
+  visibility: hidden;
+}

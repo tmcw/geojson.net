@@ -4,7 +4,6 @@ import ReactDOM from "react-dom";
 import Help from "./panel/help";
 import LayerSwitch from "./ui/layer_switch";
 import FileBar from "./ui/file_bar";
-import ModeButtons from "./ui/mode_buttons";
 import User from "./ui/user";
 import Map from "./ui/map";
 import GithubModal from "./ui/github_modal";
@@ -14,6 +13,9 @@ import { createHttpLink } from "apollo-link-http";
 import { ApolloLink } from "apollo-link";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { ApolloProvider } from "react-apollo";
+
+import { Row, Col, Button, Tabs, Menu, Dropdown, Icon, Table, List, Avatar, Badge, Card, Tooltip } from 'antd';
+import './App.css';
 
 const { access_token } = querystring.parse(location.search.replace(/^\?/, ""));
 
@@ -79,35 +81,30 @@ class App extends React.Component {
     const { setGeojson, setLayer, setMode } = this;
     return (
       <ApolloProvider client={client}>
-        <div className="vh-100 flex sans-serif black-70">
-          <div className="w-50 flex flex-column z-0">
-            <div className="bg-white pt2 ph2 flex justify-between">
+          <Row className="container">
+            <Col span={16} className="mapArea">
               <FileBar
                 geojson={geojson}
                 setGeojson={setGeojson}
                 toggleGithubModal={this.toggleGithubModal}
               />
-            </div>
-            <Map layer={layer} geojson={geojson} setGeojson={setGeojson} />
-            <LayerSwitch layer={layer} setLayer={setLayer} />
-          </div>
-          <div className="w-50 bl b--black-10 bg-light-gray flex flex-column">
-            <div
-              className="bg-white pt2 ph2 flex justify-between bb b--black-20"
-              style={{
-                flexShrink: 0
-              }}
-            >
-              <ModeButtons mode={mode} setMode={setMode} />
-              <User />
-            </div>
+              <Map layer={layer} geojson={geojson} setGeojson={setGeojson} />
+            </Col>
+
+            <Col span={8} className="sidebar">
+  <User />
             <Panel mode={mode} geojson={geojson} setGeojson={setGeojson} />
-          </div>
           {githubModal && <GithubModal />}
-        </div>
+          </Col>
+          </Row>
       </ApolloProvider>
     );
   }
 }
 
 ReactDOM.render(<App />, document.getElementById("geojsonio"));
+
+// <div className="bg-white pt2 ph2 flex justify-between">
+
+// </div>
+ // <LayerSwitch layer={layer} setLayer={setLayer} />
