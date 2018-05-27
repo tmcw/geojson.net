@@ -4,7 +4,6 @@ import jsMode from "codemirror/mode/javascript/javascript";
 import stringify from "json-stringify-pretty-compact";
 import zoomextent from "../lib/zoomextent";
 import { hint } from "@mapbox/geojsonhint";
-import saver from "../ui/saver.js";
 
 export default class Code extends React.Component {
   state = {
@@ -31,7 +30,7 @@ export default class Code extends React.Component {
         changeObj.origin == "paste";
       try {
         JSON.parse(val);
-        return setGeojson(val, 'cm');
+        return setGeojson(val, "cm");
       } catch (e) {
         console.error(e);
         this.setState({
@@ -112,7 +111,7 @@ export default class Code extends React.Component {
   }
   componentDidUpdate() {
     const { geojson, changeFrom } = this.props;
-    if (changeFrom === 'cm') {
+    if (changeFrom === "cm") {
       // we caused this change, don't react to it
       return;
     }
