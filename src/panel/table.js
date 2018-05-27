@@ -1,40 +1,48 @@
 import React from "react";
-import ReactTable from "react-table";
+import "tachyons/css/tachyons.css";
 
 export default class Table extends React.Component {
   render() {
-    const data = [
-      {
-        name: "Tanner Linsley",
-        age: 26,
-        friend: {
-          name: "Jason Maurer",
-          age: 23
-        }
-      }
+    const { geojsonObject } = this.props;
+    const features = geojsonObject.features;
+    const allProperties = [
+      ...new Set(
+        features.reduce((memo, f) => {
+          return memo.concat(Object.keys(f.properties || {}));
+        }, [])
+      )
     ];
-
-    const columns = [
-      {
-        Header: "Name",
-        accessor: "name" // String-based value accessors!
-      },
-      {
-        Header: "Age",
-        accessor: "age",
-        Cell: props => <span className="number">{props.value}</span> // Custom cell components!
-      },
-      {
-        id: "friendName", // Required because our accessor is not a string
-        Header: "Friend Name",
-        accessor: d => d.friend.name // Custom value accessors!
-      },
-      {
-        Header: props => <span>Friend Age</span>, // Custom header components!
-        accessor: "friend.age"
-      }
-    ];
-
-    return <ReactTable data={data} columns={columns} />;
+    return (
+      <div>
+        <table className="ba b--black-10 collapse">
+          <thead>
+            <tr>
+              {allProperties.map(prop => {
+                return <th className="tl ba pa1">{prop}</th>;
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {features.map(feature => {
+              return (
+                <tr>
+                  {allProperties.map(prop => {
+                    return (
+                      <td className="ba">
+                        <input
+                          className="pa1 bn"
+                          type="text"
+                          value={feature.properties[prop]}
+                        />
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
   }
 }

@@ -35,7 +35,6 @@
     "gtfs2geojson": "^1.0.0",
     "json-stringify-pretty-compact": "^1.1.0",
     "leaflet": "^1.3.1",
-    "leaflet-draw": "1.0.2",
     "leaflet-editable": "^1.1.0",
     "leaflet-geodesy": "0.1.1",
     "leaflet-hash": "0.2.1",
@@ -48,7 +47,6 @@
     "react": "^15.0.0 || ^16.0.0",
     "react-apollo": "^2.1.4",
     "react-dom": "^16.3.2",
-    "react-table": "^6.8.2",
     "sanitize-caja": "^0.1.4",
     "shp-write": "0.2.3",
     "store": "1.3.14",
@@ -63,16 +61,19 @@
     "xtend": "3.0.0"
   },
   "devDependencies": {
+    "@storybook/react": "^3.4.6",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "jest": "^22.4.4",
-    "parcel-bundler": "^1.8.1"
+    "parcel-bundler": "^1.8.1",
+    "storybook": "^1.0.0"
   },
   "scripts": {
     "start": "parcel index.html",
     "build": "parcel build index.html",
-    "test": "jest"
+    "test": "jest",
+    "storybook": "start-storybook -p 9001"
   },
   "repository": {
     "type": "git",

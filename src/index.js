@@ -47,7 +47,7 @@ class App extends React.Component {
   state = {
     mode: "code",
     layer: "mapbox",
-    githubModal: true,
+    githubModal: false,
     geojson: JSON.stringify(initialGeojson),
     geojsonObject: initialGeojson,
     changeFrom: undefined
