@@ -14,10 +14,10 @@ export default class Sidebar extends React.Component {
 
     return (
         <Tabs animated={false}>
-          <TabPane tab="View as JSON" key="1">
+          <TabPane tab="JSON" key="1">
             <Code geojson={geojson} setGeojson={setGeojson} />
           </TabPane>
-          <TabPane tab="View as Table" key="2">
+          <TabPane tab="Table" key="2">
             <Table geojson={geojson} setGeojson={setGeojson} />
           </TabPane>
           <TabPane tab="Help" key="3">

@@ -357,7 +357,7 @@ export default class FileBar extends React.Component {
         </Menu.Item>
   
         <SubMenu 
-          title={<span><Icon type="file-add" />Load Data</span>}
+          title={<span>Load</span>}
           children={
             <Menu>
               {importFormats.map((item, i) => {
@@ -369,7 +369,7 @@ export default class FileBar extends React.Component {
         </SubMenu>
 
         <SubMenu 
-          title={<span><Icon type="save" />Save Data</span>}
+          title={<span>Save</span>}
           children={
             <Menu>
               {exportFormats.map((item, i) => {
