@@ -3,11 +3,11 @@ import Help from "./help";
 import Code from "./json";
 import Table from "./table";
 
-export default ({ mode, geojson, setGeojson }) => {
-  return mode === "code" ? (
-    <Code geojson={geojson} setGeojson={setGeojson} />
-  ) : mode === "table" ? (
-    <Table geojson={geojson} setGeojson={setGeojson} />
+export default (props) => {
+  return props.mode === "code" ? (
+    <Code {...props} />
+  ) : props.mode === "table" ? (
+    <Table {...props} />
   ) : (
     <Help />
   );

@@ -30,8 +30,8 @@ export default class Code extends React.Component {
         changeObj.from.line === 0 &&
         changeObj.origin == "paste";
       try {
-        const gj = JSON.parse(val);
-        return setGeojson(gj);
+        JSON.parse(val);
+        return setGeojson(val, 'cm');
       } catch (e) {
         console.error(e);
         this.setState({
@@ -104,17 +104,21 @@ export default class Code extends React.Component {
       lineNumbers: true,
       theme: "neat"
     });
-    editor.setValue(stringify(geojson));
+    editor.setValue(geojson);
     editor.on("change", this.maybeChange);
     this.setState({
       editor
     });
   }
   componentDidUpdate() {
-    const { geojson } = this.props;
+    const { geojson, changeFrom } = this.props;
+    if (changeFrom === 'cm') {
+      // we caused this change, don't react to it
+      return;
+    }
     const { editor } = this.state;
     editor.off("change", this.maybeChange);
-    editor.setValue(stringify(geojson));
+    editor.setValue(geojson);
     editor.on("change", this.maybeChange);
   }
   render() {

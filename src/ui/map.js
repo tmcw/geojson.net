@@ -4,6 +4,7 @@ import L from "leaflet";
 import "leaflet-editable";
 import marker from "../map/marker";
 import { layers } from "../layers";
+import Popup from "./popup";
 import geojsonRewind from "geojson-rewind";
 import simplestyle from "./simplestyle";
 var makiValues = require("../../data/maki.json");
@@ -48,6 +49,76 @@ export default class Map extends React.Component {
     layers.find(({ id }) => id === layer).layer.addTo(baseLayerGroup);
     map.on("editable:drawing:commit", this.updateFromMap);
     map.on("layeradd", this.onLayerAdd);
+
+    L.EditControl = L.Control.extend({
+      options: {
+        position: "topleft",
+        callback: null,
+        kind: "",
+        html: ""
+      },
+
+      onAdd: function(map) {
+        var container = L.DomUtil.create("div", "leaflet-control leaflet-bar"),
+          link = L.DomUtil.create("a", "", container);
+
+        link.href = "#";
+        link.title = "Create a new " + this.options.kind;
+        link.innerHTML = this.options.html;
+        L.DomEvent.on(link, "click", L.DomEvent.stop).on(
+          link,
+          "click",
+          function() {
+            window.LAYER = this.options.callback.call(map.editTools);
+          },
+          this
+        );
+
+        return container;
+      }
+    });
+
+    L.NewLineControl = L.EditControl.extend({
+      options: {
+        position: "topright",
+        callback: map.editTools.startPolyline,
+        kind: "line",
+        html: "\\/\\"
+      }
+    });
+
+    L.NewPolygonControl = L.EditControl.extend({
+      options: {
+        position: "topright",
+        callback: map.editTools.startPolygon,
+        kind: "polygon",
+        html: "▰"
+      }
+    });
+
+    L.NewMarkerControl = L.EditControl.extend({
+      options: {
+        position: "topright",
+        callback: map.editTools.startMarker,
+        kind: "marker",
+        html: "🖈"
+      }
+    });
+
+    L.NewRectangleControl = L.EditControl.extend({
+      options: {
+        position: "topright",
+        callback: map.editTools.startRectangle,
+        kind: "rectangle",
+        html: "⬛"
+      }
+    });
+
+    map.addControl(new L.NewMarkerControl());
+    map.addControl(new L.NewLineControl());
+    map.addControl(new L.NewPolygonControl());
+    map.addControl(new L.NewRectangleControl());
+
     this.setState({
       map,
       baseLayerGroup,
@@ -76,20 +147,34 @@ export default class Map extends React.Component {
       );
     }
   };
+  popupRemoveLayer = layer => {
+    const { setGeojsonObject } = this.props;
+    const { mapLayer } = this.state;
+    mapLayer.removeLayer(layer);
+    let geojson = geojsonRewind(mapLayer.toGeoJSON());
+    setGeojsonObject(geojson);
+  };
   makePopup = layer => {
+    const { setGeojsonObject } = this.props;
     const div = document.createElement("div");
-    const popup = ReactDOM.render(<div>Layer</div>, div);
+    const popup = ReactDOM.render(
+      <Popup
+        layer={layer}
+        setGeojsonObject={setGeojsonObject}
+        popupRemoveLayer={this.popupRemoveLayer}
+      />,
+      div
+    );
     div.className = "ispopup";
     return div;
   };
   updateFromMap = () => {
-    const { setGeojson } = this.props;
+    const { setGeojsonObject } = this.props;
     const { mapLayer } = this.state;
     let geojson = geojsonRewind(mapLayer.toGeoJSON());
-    setGeojson(geojson);
+    setGeojsonObject(geojson);
   };
   componentDidUpdate(prevProps, prevState) {
-    console.log("map -> componentDidUpdate");
     const { layer, geojson } = this.props;
     const { baseLayerGroup, mapLayer, map } = this.state;
     if (prevProps.layer !== layer) {
@@ -97,7 +182,7 @@ export default class Map extends React.Component {
         .clearLayers()
         .addLayer(layers.find(({ id }) => id === layer).layer);
     }
-    geojsonToLayer(geojson, mapLayer);
+    geojsonToLayer(JSON.parse(geojson), mapLayer);
   }
   startLine = () => {
     const { map } = this.state;
@@ -116,37 +201,7 @@ export default class Map extends React.Component {
     map.editTools.startMarker();
   };
   render() {
-    return (
-      <div className="flex-auto flex">
-        <div className="flex-auto" ref={this.mapRef} />
-        <div className="bl b--black-10 bg-silver flex flex-column">
-          <button
-            className="bg-white pa2 b--black-10 bb tl"
-            onClick={this.startLine}
-          >
-            line
-          </button>
-          <button
-            className="bg-white pa2 b--black-10 bb tl"
-            onClick={this.startPolygon}
-          >
-            polygon
-          </button>
-          <button
-            className="bg-white pa2 b--black-10 bb tl"
-            onClick={this.startRectangle}
-          >
-            rectangle
-          </button>
-          <button
-            className="bg-white pa2 b--black-10 bb tl"
-            onClick={this.startMarker}
-          >
-            marker
-          </button>
-        </div>
-      </div>
-    );
+    return <div className="flex-auto" ref={this.mapRef} />;
   }
 }
 function layerToGeoJSON(layer) {

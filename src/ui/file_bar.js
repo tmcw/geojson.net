@@ -20,13 +20,6 @@ import geojsonRandom from "geojson-random";
 import geojsonExtent from "geojson-extent";
 import geojsonFlatten from "geojson-flatten";
 
-const shpSupport = typeof ArrayBuffer !== "undefined";
-
-const githubAPI = !!config.GithubAPI;
-const githubBase = githubAPI
-  ? config.GithubAPI + "/api/v3"
-  : "https://api.github.com";
-
 export default class FileBar extends React.Component {
   constructor(props) {
     super(props);
@@ -36,14 +29,14 @@ export default class FileBar extends React.Component {
     this.fileInputRef.current.click();
   };
   onFileInputChange = e => {
-    const { setGeojson } = this.props;
+    const { setGeojsonObject } = this.props;
     const { files } = e.target;
     if (!(files && files[0])) return;
     readFile.readAsText(files[0], function(err, text) {
       const result = readFile.readFile(files[0], text);
       if (result instanceof Error) {
       } else {
-        setGeojson(result);
+        setGeojsonObject(result);
       }
       if (files[0].path) {
         // context.data.set({
@@ -53,11 +46,11 @@ export default class FileBar extends React.Component {
     });
   };
   downloadTopo = () => {
-    const { geojson } = this.props;
+    const { geojsonObject } = this.props;
     var content = JSON.stringify(
       topojson.topology(
         {
-          collection: clone(geojson)
+          collection: clone(geojsonObject)
         },
         {
           "property-transform": function(properties, key, value) {
@@ -81,9 +74,9 @@ export default class FileBar extends React.Component {
   };
 
   downloadGPX = () => {
-    const { geojson } = this.props;
+    const { geojsonObject } = this.props;
     this.download(
-      togpx(geojson, {
+      togpx(geojsonObject, {
         creator: "geojson.net"
       }),
       "map.gpx",
@@ -92,26 +85,26 @@ export default class FileBar extends React.Component {
   };
 
   downloadGeoJSON = () => {
-    const { geojson } = this.props;
+    const { geojsonObject } = this.props;
     this.download(
-      JSON.stringify(geojson, null, 2),
+      JSON.stringify(geojsonObject, null, 2),
       "map.geojson",
       "text/plain;charset=utf-8"
     );
   };
 
   downloadDSV = () => {
-    const { geojson } = this.props;
+    const { geojsonObject } = this.props;
     this.download(
-      geojson2dsv(geojson),
+      geojson2dsv(geojsonObject),
       "points.csv",
       "text/plain;charset=utf-8"
     );
   };
 
   downloadKML = () => {
-    const { geojson } = this.props;
-    this.download(tokml(geojson), "map.kml", "text/plain;charset=utf-8");
+    const { geojsonObject } = this.props;
+    this.download(tokml(geojsonObject), "map.kml", "text/plain;charset=utf-8");
   };
 
   downloadShp = () => {
@@ -124,20 +117,19 @@ export default class FileBar extends React.Component {
   };
 
   downloadWKT = () => {
-    var contentArray = [];
-    var features = context.data.get("map").features;
+    const { geojsonObject } = this.props;
+    var features = geojsonObject.features;
     if (features.length === 0) return;
     var content = features.map(wellknown.stringify).join("\n");
-    saveAs(
-      new Blob([content], {
-        type: "text/plain;charset=utf-8"
-      }),
-      "map.wkt"
+    this.download(
+      content,
+      "map.wkt",
+      "text/plain;charset=utf-8"
     );
   };
 
   render() {
-    const { setGeojson } = this.props;
+    const { setGeojsonObject } = this.props;
     const exportFormats = [
       {
         title: "GeoJSON",
@@ -167,7 +159,6 @@ export default class FileBar extends React.Component {
     var actions = [
       {
         title: "Save",
-        action: githubAPI ? saveAction : function() {},
         children: exportFormats
       },
       {
@@ -191,7 +182,7 @@ export default class FileBar extends React.Component {
                   "Are you sure you want to delete all features from this map?"
                 )
               ) {
-                setGeojson({ type: "FeatureCollection", features: [] });
+                setGeojsonObject({ type: "FeatureCollection", features: [] });
               }
             }
           },
@@ -199,25 +190,25 @@ export default class FileBar extends React.Component {
             title: "Random: Points",
             alt: "Add random points to your map",
             action: () => {
-              const { setGeojson, geojson } = this.props;
+              const { setGeojsonObject, geojsonObject } = this.props;
               var response = prompt("Number of points (default: 100)");
               if (response === null) return;
               var count = parseInt(response, 10);
               if (isNaN(count)) count = 100;
-              const fc = geojsonNormalize(geojson);
+              const fc = geojsonNormalize(geojsonObject);
               fc.features.push.apply(
                 fc.features,
                 geojsonRandom(count, "point").features
               );
-              setGeojson(fc);
+              setGeojsonObject(fc);
             }
           },
           {
             title: "Add bboxes",
             alt: "Add bounding box members to all applicable GeoJSON objects",
             action: () => {
-              const { setGeojson, geojson } = this.props;
-              setGeojson(geojsonExtent.bboxify(geojson));
+              const { setGeojsonObject, geojsonObject } = this.props;
+              setGeojsonObject(geojsonExtent.bboxify(geojsonObject));
             }
           },
           {
@@ -225,8 +216,8 @@ export default class FileBar extends React.Component {
             alt:
               "Flatten MultiPolygons, MultiLines, and GeometryCollections into simple geometries",
             action: () => {
-              const { setGeojson, geojson } = this.props;
-              setGeojson(geojsonFlatten(geojson));
+              const { setGeojsonObject, geojsonObject } = this.props;
+              setGeojsonObject(geojsonFlatten(geojsonObject));
             }
           },
           // https://developers.google.com/maps/documentation/utilities/polylinealgorithm
@@ -235,11 +226,11 @@ export default class FileBar extends React.Component {
             alt:
               "Decode and show an encoded polyline. Precision 5 is supported.",
             action: () => {
-              const { setGeojson } = this.props;
+              const { setGeojsonObject } = this.props;
               const input = prompt("Enter your polyline");
               try {
                 const decoded = polyline.toGeoJSON(input);
-                setGeojson(decoded);
+                setGeojsonObject(decoded);
               } catch (e) {
                 alert("Sorry, we were unable to decode that polyline");
               }
@@ -253,7 +244,7 @@ export default class FileBar extends React.Component {
               try {
                 // TODO: base64 in browser
                 var decoded = wkx.Geometry.parse(Buffer.from(input, "base64"));
-                setGeojson(decoded.toGeoJSON());
+                setGeojsonObject(decoded.toGeoJSON());
                 // zoomextent(context); TODO
               } catch (e) {
                 console.error(e);
@@ -270,7 +261,7 @@ export default class FileBar extends React.Component {
               const input = prompt("Enter your Hex encoded WKB/EWKB");
               try {
                 var decoded = wkx.Geometry.parse(Buffer.from(input, "hex"));
-                setGeojson(decoded.toGeoJSON());
+                setGeojsonObject(decoded.toGeoJSON());
                 // zoomextent(context); TODO
               } catch (e) {
                 console.error(e);
@@ -287,7 +278,7 @@ export default class FileBar extends React.Component {
               const input = prompt("Enter your WKT/EWKT String");
               try {
                 var decoded = wkx.Geometry.parse(input);
-                setGeojson(decoded.toGeoJSON());
+                setGeojsonObject(decoded.toGeoJSON());
                 // zoomextent(context); TODO
               } catch (e) {
                 console.error(e);
@@ -320,18 +311,6 @@ export default class FileBar extends React.Component {
           action: () => {}
         }
       ]
-    });
-
-    actions.splice(3, 0, {
-      title: "Share",
-      action: function() {
-        context.container.call(share(context));
-      }
-    });
-    actions.unshift({
-      title: "Open",
-      alt: "CSV, GTFS, KML, GPX, and other filetypes",
-      action: this.blindImport
     });
 
     return (
@@ -376,76 +355,5 @@ export default class FileBar extends React.Component {
         />
       </div>
     );
-  }
-}
-
-if (githubAPI) {
-  var filetype = name
-    .append("a")
-    .attr("target", "_blank")
-    .attr("class", "icon-file-alt");
-
-  var filename = name
-    .append("span")
-    .attr("class", "filename")
-    .text("unsaved");
-}
-
-function clickGistSave() {
-  context.data.set({ type: "gist" });
-  saver(context);
-}
-
-function saveAction() {
-  saver(context);
-}
-
-function sourceIcon(type) {
-  if (type == "github") return "icon-github";
-  else if (type == "gist") return "icon-github-alt";
-  else return "icon-file-alt";
-}
-
-function saveNoun(_) {
-  buttons
-    .filter(function(b) {
-      return b.title === "Save";
-    })
-    .select("span.title")
-    .text(_);
-}
-
-function onchange(d) {
-  var data = d.obj,
-    type = data.type,
-    path = data.path;
-  if (githubAPI)
-    filename
-      .text(path ? path : "unsaved")
-      .classed("deemphasize", context.data.dirty);
-  if (githubAPI)
-    filetype.attr("href", data.url).attr("class", sourceIcon(type));
-  saveNoun(type == "github" ? "Commit" : "Save");
-}
-
-function onImport(err, gj, warning) {
-  if (err) {
-    if (err.message) {
-      flash(context.container, err.message).classed("error", "true");
-    }
-    return;
-  }
-  gj = geojsonNormalize(gj);
-  if (gj) {
-    context.data.mergeFeatures(gj.features);
-    if (warning) {
-      flash(context.container, warning.message);
-    } else {
-      flash(
-        context.container,
-        "Imported " + gj.features.length + " features."
-      ).classed("success", "true");
-    }
-    zoomextent(context);
   }
 }
