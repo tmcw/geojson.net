@@ -68,7 +68,8 @@ div#geojsonnet .leaflet-bar a {
 }
 
 div#geojsonnet .leaflet-bar a:hover {
-  background: var(--yellow);
+  background: var(--purple);
+  color: #fff;
 }
 
 div#geojsonnet .leaflet-container {
