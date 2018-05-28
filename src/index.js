@@ -10,7 +10,6 @@ import Map from "./ui/map";
 import GithubModal from "./ui/github_modal";
 import Panel from "./panel/index";
 import ApolloClient from "apollo-client";
-import stringify from "json-stringify-pretty-compact";
 import { createHttpLink } from "apollo-link-http";
 import { ApolloLink } from "apollo-link";
 import { InMemoryCache } from "apollo-cache-inmemory";
@@ -48,8 +47,7 @@ class App extends React.Component {
     mode: "code",
     layer: "mapbox",
     githubModal: false,
-    geojson: JSON.stringify(initialGeojson),
-    geojsonObject: initialGeojson,
+    geojson: initialGeojson,
     changeFrom: undefined
   };
   setMode = mode => {
@@ -64,14 +62,7 @@ class App extends React.Component {
     this.setState({ layer });
   };
   setGeojson = (geojson, changeFrom) => {
-    this.setState({ geojson, geojsonObject: JSON.parse(geojson), changeFrom });
-  };
-  setGeojsonObject = (geojsonObject, changeFrom) => {
-    this.setState({
-      geojsonObject,
-      geojson: stringify(geojsonObject),
-      changeFrom
-    });
+    this.setState({ geojson, changeFrom });
   };
   render() {
     const {
@@ -83,18 +74,17 @@ class App extends React.Component {
       mode,
       githubModal
     } = this.state;
-    const { setGeojson, setLayer, setMode, setGeojsonObject } = this;
+    const { setGeojson, setLayer, setMode } = this;
     return (
       <ApolloProvider client={client}>
-        <div className="f6">
-          <div className="vh-100 flex sans-serif">
+        <div className="f6 sans-serif fw6">
+          <div className="vh-100 flex">
             <div className="w-50 flex flex-column z-0">
               <div className="bg-white flex justify-between bb">
                 <FileBar
                   geojson={geojson}
                   geojsonObject={geojsonObject}
                   setGeojson={setGeojson}
-                  setGeojsonObject={setGeojsonObject}
                   toggleGithubModal={this.toggleGithubModal}
                 />
               </div>
@@ -102,7 +92,7 @@ class App extends React.Component {
                 layer={layer}
                 geojson={geojson}
                 setGeojson={setGeojson}
-                setGeojsonObject={setGeojsonObject}
+                changeFrom={changeFrom}
               />
               <LayerSwitch layer={layer} setLayer={setLayer} />
             </div>

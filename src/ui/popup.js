@@ -5,6 +5,7 @@ import { geometry as geometryArea } from "@mapbox/geojson-area";
 export default class Popup extends React.Component {
   render() {
     const { layer, editProperties, popupRemoveLayer } = this.props;
+    const { properties } = layer.toGeoJSON();
     return (
       <div>
         <ReactJson
@@ -14,7 +15,7 @@ export default class Popup extends React.Component {
           onAdd={editProperties}
           onDelete={editProperties}
           enableClipboard={false}
-          src={{ hi: "Tom" }}
+          src={properties}
         />
         <Metadata layer={layer} />
         <button onClick={() => popupRemoveLayer(layer)}>Delete feature</button>

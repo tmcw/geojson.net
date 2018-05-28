@@ -5,6 +5,15 @@ import matchBrackets from "codemirror/addon/edit/matchbrackets";
 import stringify from "json-stringify-pretty-compact";
 import zoomextent from "../lib/zoomextent";
 import { hint } from "@mapbox/geojsonhint";
+import equal from "deep-equal";
+
+function maybeParse(str) {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return new Error("could not parse");
+  }
+}
 
 export default class Code extends React.Component {
   state = {
@@ -25,13 +34,13 @@ export default class Code extends React.Component {
     } else if (err.length) {
       this.handleGeoJSONError(editor, err);
     } else {
+      console.log("valid geojson, sending");
       const zoom =
         changeObj.from.ch === 0 &&
         changeObj.from.line === 0 &&
         changeObj.origin == "paste";
       try {
-        JSON.parse(val);
-        return setGeojson(val, "cm");
+        return setGeojson(JSON.parse(val), "cm");
       } catch (e) {
         console.error(e);
         this.setState({
@@ -104,22 +113,20 @@ export default class Code extends React.Component {
       lineNumbers: true,
       theme: "idea"
     });
-    editor.setValue(geojson);
+    editor.setValue(stringify(geojson));
     editor.on("change", this.maybeChange);
     this.setState({
       editor
     });
   }
-  componentDidUpdate() {
-    const { geojson, changeFrom } = this.props;
-    if (changeFrom === "cm") {
-      // we caused this change, don't react to it
-      return;
-    }
+  componentDidUpdate(prevProps) {
     const { editor } = this.state;
-    editor.off("change", this.maybeChange);
-    editor.setValue(geojson);
-    editor.on("change", this.maybeChange);
+    const { geojson, changeFrom } = this.props;
+    if (changeFrom !== "cm") {
+      editor.off("change", this.maybeChange);
+      editor.setValue(stringify(geojson));
+      editor.on("change", this.maybeChange);
+    }
   }
   render() {
     return <div className="flex-auto flex" ref={this.codeMirrorContainer} />;

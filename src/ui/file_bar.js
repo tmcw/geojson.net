@@ -29,14 +29,14 @@ export default class FileBar extends React.Component {
     this.fileInputRef.current.click();
   };
   onFileInputChange = e => {
-    const { setGeojsonObject } = this.props;
+    const { setGeojson } = this.props;
     const { files } = e.target;
     if (!(files && files[0])) return;
     readFile.readAsText(files[0], function(err, text) {
       const result = readFile.readFile(files[0], text);
       if (result instanceof Error) {
       } else {
-        setGeojsonObject(result);
+        setGeojson(result);
       }
       if (files[0].path) {
         // context.data.set({
@@ -46,11 +46,11 @@ export default class FileBar extends React.Component {
     });
   };
   downloadTopo = () => {
-    const { geojsonObject } = this.props;
+    const { geojson } = this.props;
     var content = JSON.stringify(
       topojson.topology(
         {
-          collection: clone(geojsonObject)
+          collection: clone(geojson)
         },
         {
           "property-transform": function(properties, key, value) {
@@ -74,9 +74,9 @@ export default class FileBar extends React.Component {
   };
 
   downloadGPX = () => {
-    const { geojsonObject } = this.props;
+    const { geojson } = this.props;
     this.download(
-      togpx(geojsonObject, {
+      togpx(geojson, {
         creator: "geojson.net"
       }),
       "map.gpx",
@@ -85,26 +85,26 @@ export default class FileBar extends React.Component {
   };
 
   downloadGeoJSON = () => {
-    const { geojsonObject } = this.props;
+    const { geojson } = this.props;
     this.download(
-      JSON.stringify(geojsonObject, null, 2),
+      JSON.stringify(geojson, null, 2),
       "map.geojson",
       "text/plain;charset=utf-8"
     );
   };
 
   downloadDSV = () => {
-    const { geojsonObject } = this.props;
+    const { geojson } = this.props;
     this.download(
-      geojson2dsv(geojsonObject),
+      geojson2dsv(geojson),
       "points.csv",
       "text/plain;charset=utf-8"
     );
   };
 
   downloadKML = () => {
-    const { geojsonObject } = this.props;
-    this.download(tokml(geojsonObject), "map.kml", "text/plain;charset=utf-8");
+    const { geojson } = this.props;
+    this.download(tokml(geojson), "map.kml", "text/plain;charset=utf-8");
   };
 
   downloadShp = () => {
@@ -117,15 +117,15 @@ export default class FileBar extends React.Component {
   };
 
   downloadWKT = () => {
-    const { geojsonObject } = this.props;
-    var features = geojsonObject.features;
+    const { geojson } = this.props;
+    var features = geojson.features;
     if (features.length === 0) return;
     var content = features.map(wellknown.stringify).join("\n");
     this.download(content, "map.wkt", "text/plain;charset=utf-8");
   };
 
   render() {
-    const { setGeojsonObject } = this.props;
+    const { setGeojson } = this.props;
     const exportFormats = [
       {
         title: "GeoJSON",
@@ -178,7 +178,7 @@ export default class FileBar extends React.Component {
                   "Are you sure you want to delete all features from this map?"
                 )
               ) {
-                setGeojsonObject({ type: "FeatureCollection", features: [] });
+                setGeojson({ type: "FeatureCollection", features: [] });
               }
             }
           },
@@ -186,25 +186,25 @@ export default class FileBar extends React.Component {
             title: "Random: Points",
             alt: "Add random points to your map",
             action: () => {
-              const { setGeojsonObject, geojsonObject } = this.props;
+              const { setGeojson, geojson } = this.props;
               var response = prompt("Number of points (default: 100)");
               if (response === null) return;
               var count = parseInt(response, 10);
               if (isNaN(count)) count = 100;
-              const fc = geojsonNormalize(geojsonObject);
+              const fc = geojsonNormalize(geojson);
               fc.features.push.apply(
                 fc.features,
                 geojsonRandom(count, "point").features
               );
-              setGeojsonObject(fc);
+              setGeojson(fc);
             }
           },
           {
             title: "Add bboxes",
             alt: "Add bounding box members to all applicable GeoJSON objects",
             action: () => {
-              const { setGeojsonObject, geojsonObject } = this.props;
-              setGeojsonObject(geojsonExtent.bboxify(geojsonObject));
+              const { setGeojson, geojson } = this.props;
+              setGeojson(geojsonExtent.bboxify(geojson));
             }
           },
           {
@@ -212,8 +212,8 @@ export default class FileBar extends React.Component {
             alt:
               "Flatten MultiPolygons, MultiLines, and GeometryCollections into simple geometries",
             action: () => {
-              const { setGeojsonObject, geojsonObject } = this.props;
-              setGeojsonObject(geojsonFlatten(geojsonObject));
+              const { setGeojson, geojson } = this.props;
+              setGeojson(geojsonFlatten(geojson));
             }
           },
           // https://developers.google.com/maps/documentation/utilities/polylinealgorithm
@@ -222,11 +222,11 @@ export default class FileBar extends React.Component {
             alt:
               "Decode and show an encoded polyline. Precision 5 is supported.",
             action: () => {
-              const { setGeojsonObject } = this.props;
+              const { setGeojson } = this.props;
               const input = prompt("Enter your polyline");
               try {
                 const decoded = polyline.toGeoJSON(input);
-                setGeojsonObject(decoded);
+                setGeojson(decoded);
               } catch (e) {
                 alert("Sorry, we were unable to decode that polyline");
               }
@@ -240,7 +240,7 @@ export default class FileBar extends React.Component {
               try {
                 // TODO: base64 in browser
                 var decoded = wkx.Geometry.parse(Buffer.from(input, "base64"));
-                setGeojsonObject(decoded.toGeoJSON());
+                setGeojson(decoded.toGeoJSON());
                 // zoomextent(context); TODO
               } catch (e) {
                 console.error(e);
@@ -257,7 +257,7 @@ export default class FileBar extends React.Component {
               const input = prompt("Enter your Hex encoded WKB/EWKB");
               try {
                 var decoded = wkx.Geometry.parse(Buffer.from(input, "hex"));
-                setGeojsonObject(decoded.toGeoJSON());
+                setGeojson(decoded.toGeoJSON());
                 // zoomextent(context); TODO
               } catch (e) {
                 console.error(e);
@@ -274,7 +274,7 @@ export default class FileBar extends React.Component {
               const input = prompt("Enter your WKT/EWKT String");
               try {
                 var decoded = wkx.Geometry.parse(input);
-                setGeojsonObject(decoded.toGeoJSON());
+                setGeojson(decoded.toGeoJSON());
                 // zoomextent(context); TODO
               } catch (e) {
                 console.error(e);

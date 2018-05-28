@@ -70,3 +70,7 @@ div#geojsonnet .leaflet-bar a {
 div#geojsonnet .leaflet-bar a:hover {
   background: var(--yellow);
 }
+
+div#geojsonnet .leaflet-container {
+  font-family: inherit;
+}

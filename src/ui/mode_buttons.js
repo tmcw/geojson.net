@@ -18,14 +18,14 @@ const buttons = [
 export default ({ mode, setMode }) => (
   <div className="inline-flex">
     {buttons.map((button, i) => (
-      <button
+      <span
         key={i}
         className={`db bn pa2 outline-0 pointer black
                   ${mode == button.mode ? "bg-light-yellow" : ""}`}
         onClick={() => setMode(button.mode)}
       >
         {button.title}
-      </button>
+      </span>
     ))}
   </div>
 );

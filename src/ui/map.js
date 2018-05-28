@@ -20,11 +20,11 @@ export default class Map extends React.Component {
     this.mapRef = React.createRef();
   }
   componentDidMount() {
-    let mapLayer = L.featureGroup();
+    const featuresLayer = L.layerGroup();
     let map = new L.Map(this.mapRef.current, {
       editable: true,
       editOptions: {
-        featuresLayer: mapLayer
+        featuresLayer
       }
     });
     const { layer } = this.props;
@@ -33,19 +33,18 @@ export default class Map extends React.Component {
       .setPosition("bottomright")
       .addTo(map);
     map.zoomControl.setPosition("topright");
+
     // L.hash(map);
     const metric =
       navigator.language !== "en-us" && navigator.language !== "en-US";
+
     map.setView([20, 0], 2);
 
     map.attributionControl.setPrefix("");
 
-    map.removeLayer(mapLayer);
     const baseLayerGroup = L.layerGroup().addTo(map);
-    map.addLayer(mapLayer);
     layers.find(({ id }) => id === layer).layer.addTo(baseLayerGroup);
-    map.on("editable:drawing:commit", this.updateFromMap);
-    mapLayer.on("layeradd", this.onLayerAdd);
+    // map.on("editable:drawing:commit", this.updateFromMap);
 
     L.EditControl = L.Control.extend({
       options: {
@@ -115,20 +114,20 @@ export default class Map extends React.Component {
     map.addControl(new L.NewLineControl());
     map.addControl(new L.NewPolygonControl());
     map.addControl(new L.NewRectangleControl());
+    map.addLayer(featuresLayer);
+
+    map
+      .on("editable:dragend", this.updateFromMap)
+      .on("editable:created", this.updateFromMap)
+      .on("editable:drawing:commit", this.ensureMapIsGeoJSON)
+      .on("editable:editing", this.updateFromMap);
 
     this.setState({
       map,
-      baseLayerGroup,
-      mapLayer
+      baseLayerGroup
     });
   }
-  createFromMap = e => {
-    const { mapLayer } = this.state;
-    mapLayer.addLayer(e.layer);
-    this.updateFromMap();
-  };
-  onLayerAdd = e => {
-    const { layer } = e;
+  bindLayerPopup = layer => {
     if ("bindPopup" in layer) {
       layer.bindPopup(
         L.popup(
@@ -145,23 +144,24 @@ export default class Map extends React.Component {
     }
   };
   popupRemoveLayer = layer => {
-    const { setGeojsonObject } = this.props;
+    const { setGeojson } = this.props;
     const { mapLayer } = this.state;
     mapLayer.removeLayer(layer);
     let geojson = geojsonRewind(mapLayer.toGeoJSON());
-    setGeojsonObject(geojson);
+    setGeojson(geojson, "map");
   };
-  editProperties = properties => {
-    console.log(properties);
+  editProperties = (update, layer) => {
+    layer.feature.properties = update.updated_src;
+    this.updateFromMap();
   };
   makePopup = layer => {
-    const { setGeojsonObject } = this.props;
+    const { setGeojson } = this.props;
     const div = document.createElement("div");
     const popup = ReactDOM.render(
       <Popup
         layer={layer}
-        editProperties={this.editProperties}
-        setGeojsonObject={setGeojsonObject}
+        editProperties={update => this.editProperties(update, layer)}
+        setGeojson={setGeojson}
         popupRemoveLayer={this.popupRemoveLayer}
       />,
       div
@@ -169,21 +169,48 @@ export default class Map extends React.Component {
     div.className = "ispopup";
     return div;
   };
+  ensureMapIsGeoJSON = e => {
+    const {
+      map: {
+        editTools: { featuresLayer }
+      }
+    } = this.state;
+    const geojson = featuresLayer.toGeoJSON();
+    featuresLayer.clearLayers();
+    console.log(featuresLayer, geojson);
+    L.geoJson(geojson).eachLayer(layer => {
+      featuresLayer.addLayer(layer);
+      // layer must be added before editing can be enabled.
+      layer.enableEdit();
+    });
+    this.updateFromMap(e);
+  };
   updateFromMap = () => {
-    const { setGeojsonObject } = this.props;
-    const { mapLayer } = this.state;
-    let geojson = geojsonRewind(mapLayer.toGeoJSON());
-    setGeojsonObject(geojson);
+    const {
+      map: {
+        editTools: { featuresLayer }
+      }
+    } = this.state;
+    const { setGeojson } = this.props;
+    let geojson = geojsonRewind(featuresLayer.toGeoJSON());
+    setGeojson(geojson, "map");
+    featuresLayer.eachLayer(this.bindLayerPopup);
   };
   componentDidUpdate(prevProps, prevState) {
-    const { layer, geojson } = this.props;
-    const { baseLayerGroup, mapLayer, map } = this.state;
-    if (prevProps.layer !== layer) {
-      baseLayerGroup
-        .clearLayers()
-        .addLayer(layers.find(({ id }) => id === layer).layer);
+    const { geojson, changeFrom } = this.props;
+    if (geojson !== prevProps.geojson && changeFrom !== "map") {
+      const {
+        map: {
+          editTools: { featuresLayer }
+        }
+      } = this.state;
+      featuresLayer.clearLayers();
+      L.geoJson(geojson).eachLayer(layer => {
+        featuresLayer.addLayer(layer);
+        // layer must be added before editing can be enabled.
+        layer.enableEdit();
+      });
     }
-    geojsonToLayer(JSON.parse(geojson), mapLayer);
   }
   startLine = () => {
     const { map } = this.state;
