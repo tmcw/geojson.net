@@ -36,11 +36,11 @@ Install [browserify](https://github.com/substack/node-browserify)'ied libraries:
 
 Browserify libraries, concat other libraries, build minimal d3:
 
-    make
+    npm run build 
 
 Run a local server with [visionmedia/serve](https://github.com/visionmedia/serve):
 
-    serve -p 8080
+    npm start -- -p 8080
 
 Port 8080 is recommended because by default geojson.io will use a
 [prose/gatekeeper](https://github.com/prose/gatekeeper) auth server that redirects
