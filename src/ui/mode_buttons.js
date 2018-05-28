@@ -21,7 +21,7 @@ export default ({ mode, setMode }) => (
       <span
         key={i}
         className={`db bn pa2 outline-0 pointer black
-                  ${mode == button.mode ? "bg-light-yellow" : ""}`}
+                  ${mode == button.mode ? "bg-yellow" : ""}`}
         onClick={() => setMode(button.mode)}
       >
         {button.title}

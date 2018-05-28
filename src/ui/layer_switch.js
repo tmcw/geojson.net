@@ -9,7 +9,7 @@ export default ({ layer, setLayer }) => (
         key={id}
         onClick={() => setLayer(id)}
         className={`db pointer bn pa2 outline-0 ${
-          layer === id ? "bg-light-yellow" : ""
+          layer === id ? "bg-yellow" : ""
         }`}
       >
         {title}

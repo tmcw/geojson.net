@@ -197,7 +197,12 @@ export default class Map extends React.Component {
     featuresLayer.eachLayer(this.bindLayerPopup);
   };
   componentDidUpdate(prevProps, prevState) {
-    const { geojson, changeFrom } = this.props;
+    const { baseLayerGroup } = this.state;
+    const { layer, geojson, changeFrom } = this.props;
+    if (layer !== prevProps.layer) {
+      baseLayerGroup.clearLayers();
+      layers.find(({ id }) => id === layer).layer.addTo(baseLayerGroup);
+    }
     if (geojson !== prevProps.geojson && changeFrom !== "map") {
       const {
         map: {

@@ -14,6 +14,7 @@ import { createHttpLink } from "apollo-link-http";
 import { ApolloLink } from "apollo-link";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { ApolloProvider } from "react-apollo";
+import Dropzone from "react-dropzone";
 
 const { access_token } = querystring.parse(location.search.replace(/^\?/, ""));
 
@@ -48,7 +49,8 @@ class App extends React.Component {
     layer: "mapbox",
     githubModal: false,
     geojson: initialGeojson,
-    changeFrom: undefined
+    changeFrom: undefined,
+    dropzoneActive: false
   };
   setMode = mode => {
     this.setState({ mode });
@@ -64,6 +66,31 @@ class App extends React.Component {
   setGeojson = (geojson, changeFrom) => {
     this.setState({ geojson, changeFrom });
   };
+  onDragEnter = () => {
+    this.setState({
+      dropzoneActive: true
+    });
+  };
+  onDragLeave = () => {
+    this.setState({
+      dropzoneActive: false
+    });
+  };
+  onDrop = files => {
+    this.setState({
+      dropzoneActive: false
+    });
+    this.importFiles(files);
+  };
+  importFiles = files => {
+    const { setGeojson } = this;
+    const [file] = files;
+    const reader = new FileReader();
+    reader.readAsText(file);
+    reader.addEventListener("load", () => {
+      setGeojson(JSON.parse(reader.result));
+    });
+  };
   render() {
     const {
       geojson,
@@ -72,50 +99,73 @@ class App extends React.Component {
       layer,
       map,
       mode,
-      githubModal
+      githubModal,
+      accept,
+      files,
+      dropzoneActive
     } = this.state;
     const { setGeojson, setLayer, setMode } = this;
     return (
       <ApolloProvider client={client}>
-        <div className="f6 sans-serif fw6">
-          <div className="vh-100 flex">
-            <div className="w-50 flex flex-column z-0">
-              <div className="bg-white flex justify-between bb">
-                <FileBar
+        <Dropzone
+          disableClick
+          style={{ position: "relative" }}
+          onDrop={this.onDrop}
+          onDragEnter={this.onDragEnter}
+          onDragLeave={this.onDragLeave}
+        >
+          <div className="f6 sans-serif fw6">
+            <div className="vh-100 flex">
+              <div className="w-50 flex flex-column z-0">
+                <div className="bg-white flex justify-between bb">
+                  <FileBar
+                    geojson={geojson}
+                    geojsonObject={geojsonObject}
+                    setGeojson={setGeojson}
+                    toggleGithubModal={this.toggleGithubModal}
+                  />
+                </div>
+                <Map
+                  layer={layer}
                   geojson={geojson}
-                  geojsonObject={geojsonObject}
                   setGeojson={setGeojson}
-                  toggleGithubModal={this.toggleGithubModal}
+                  changeFrom={changeFrom}
+                />
+                <LayerSwitch layer={layer} setLayer={setLayer} />
+              </div>
+              <div className="w-50 bl flex flex-column">
+                <div
+                  className="bg-white flex justify-between bb"
+                  style={{
+                    flexShrink: 0
+                  }}
+                >
+                  <ModeButtons mode={mode} setMode={setMode} />
+                  {/* <User /> */}
+                </div>
+                <Panel
+                  mode={mode}
+                  geojson={geojson}
+                  setGeojson={setGeojson}
+                  changeFrom={changeFrom}
                 />
               </div>
-              <Map
-                layer={layer}
-                geojson={geojson}
-                setGeojson={setGeojson}
-                changeFrom={changeFrom}
-              />
-              <LayerSwitch layer={layer} setLayer={setLayer} />
+              {/*githubModal && <GithubModal /> */}
             </div>
-            <div className="w-50 bl flex flex-column">
-              <div
-                className="bg-white flex justify-between bb"
-                style={{
-                  flexShrink: 0
-                }}
-              >
-                <ModeButtons mode={mode} setMode={setMode} />
-                {/* <User /> */}
-              </div>
-              <Panel
-                mode={mode}
-                geojson={geojson}
-                setGeojson={setGeojson}
-                changeFrom={changeFrom}
-              />
-            </div>
-            {/*githubModal && <GithubModal /> */}
           </div>
-        </div>
+          {dropzoneActive && (
+            <div
+              className="absolute absolute--fill bg-black-20 flex items-center justify-center"
+              style={{
+                zIndex: 999
+              }}
+            >
+              <div className="sans-serif bg-white pa2 ba">
+                Drop files to import
+              </div>
+            </div>
+          )}
+        </Dropzone>
       </ApolloProvider>
     );
   }
