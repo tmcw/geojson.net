@@ -122,7 +122,7 @@ export default class Code extends React.Component {
   componentDidUpdate(prevProps) {
     const { editor } = this.state;
     const { geojson, changeFrom } = this.props;
-    if (changeFrom !== "cm") {
+    if (changeFrom !== "cm" && geojson !== prevProps.geojson) {
       editor.off("change", this.maybeChange);
       editor.setValue(stringify(geojson));
       editor.on("change", this.maybeChange);

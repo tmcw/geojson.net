@@ -75,3 +75,19 @@ div#geojsonnet .leaflet-bar a:hover {
 div#geojsonnet .leaflet-container {
   font-family: inherit;
 }
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  border: 1px solid #000;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+}

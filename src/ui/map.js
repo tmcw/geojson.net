@@ -9,10 +9,25 @@ import geojsonRewind from "geojson-rewind";
 import simplestyle from "./simplestyle";
 var makiValues = require("../../data/maki.json");
 
+import iconRetinaUrl from "../../css/marker-icon-2x.png";
+import iconUrl from "../../css/marker-icon.png";
+import shadowUrl from "../../css/marker-shadow.png";
+
 let maki = "";
 for (var i = 0; i < makiValues.length; i++) {
   maki += '<option value="' + makiValues[i].icon + '">';
 }
+
+L.Marker.prototype.options.icon = new L.Icon({
+  iconUrl,
+  iconRetinaUrl,
+  shadowUrl,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  tooltipAnchor: [16, -28],
+  shadowSize: [41, 41]
+});
 
 export default class Map extends React.Component {
   constructor(props) {
@@ -133,6 +148,7 @@ export default class Map extends React.Component {
         L.popup(
           {
             closeButton: false,
+            minWidth: 320,
             maxWidth: 500,
             maxHeight: 400,
             autoPanPadding: [5, 45],
@@ -177,7 +193,6 @@ export default class Map extends React.Component {
     } = this.state;
     const geojson = featuresLayer.toGeoJSON();
     featuresLayer.clearLayers();
-    console.log(featuresLayer, geojson);
     L.geoJson(geojson).eachLayer(layer => {
       featuresLayer.addLayer(layer);
       // layer must be added before editing can be enabled.
@@ -215,6 +230,7 @@ export default class Map extends React.Component {
         // layer must be added before editing can be enabled.
         layer.enableEdit();
       });
+      featuresLayer.eachLayer(this.bindLayerPopup);
     }
   }
   startLine = () => {
@@ -235,32 +251,5 @@ export default class Map extends React.Component {
   };
   render() {
     return <div className="flex-auto" ref={this.mapRef} />;
-  }
-}
-function layerToGeoJSON(layer) {
-  var features = [];
-  layer.eachLayer(collect);
-  function collect(l) {
-    if ("toGeoJSON" in l) features.push(l.toGeoJSON());
-  }
-  return {
-    type: "FeatureCollection",
-    features: features
-  };
-}
-
-function geojsonToLayer(geojson, layer) {
-  layer.clearLayers();
-  L.geoJson(geojson, {
-    style: simplestyle,
-    pointToLayer: function(feature, latlon) {
-      if (!feature.properties) feature.properties = {};
-      return marker.style(feature, latlon);
-    }
-  }).eachLayer(add);
-
-  function add(l) {
-    // bindPopup(l);
-    l.addTo(layer);
   }
 }
