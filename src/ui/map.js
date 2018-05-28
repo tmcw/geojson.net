@@ -7,16 +7,10 @@ import { layers } from "../layers";
 import Popup from "./popup";
 import geojsonRewind from "geojson-rewind";
 import simplestyle from "./simplestyle";
-var makiValues = require("../../data/maki.json");
-
 import iconRetinaUrl from "../../css/marker-icon-2x.png";
 import iconUrl from "../../css/marker-icon.png";
 import shadowUrl from "../../css/marker-shadow.png";
 
-let maki = "";
-for (var i = 0; i < makiValues.length; i++) {
-  maki += '<option value="' + makiValues[i].icon + '">';
-}
 
 L.Marker.prototype.options.icon = new L.Icon({
   iconUrl,
