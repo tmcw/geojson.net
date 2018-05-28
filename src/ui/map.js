@@ -48,7 +48,7 @@ export default class Map extends React.Component {
     map.addLayer(mapLayer);
     layers.find(({ id }) => id === layer).layer.addTo(baseLayerGroup);
     map.on("editable:drawing:commit", this.updateFromMap);
-    map.on("layeradd", this.onLayerAdd);
+    mapLayer.on("layeradd", this.onLayerAdd);
 
     L.EditControl = L.Control.extend({
       options: {
@@ -154,12 +154,16 @@ export default class Map extends React.Component {
     let geojson = geojsonRewind(mapLayer.toGeoJSON());
     setGeojsonObject(geojson);
   };
+  editProperties = properties => {
+    console.log(properties);
+  };
   makePopup = layer => {
     const { setGeojsonObject } = this.props;
     const div = document.createElement("div");
     const popup = ReactDOM.render(
       <Popup
         layer={layer}
+        editProperties={this.editProperties}
         setGeojsonObject={setGeojsonObject}
         popupRemoveLayer={this.popupRemoveLayer}
       />,
