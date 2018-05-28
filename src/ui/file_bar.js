@@ -1,6 +1,5 @@
 import React from "react";
 import L from "leaflet";
-import keybinding from "../../lib/d3.keybinding";
 import shpwrite from "shp-write";
 import wkx from "wkx";
 import clone from "clone";
@@ -10,12 +9,9 @@ import polyline from "@mapbox/polyline";
 import topojson from "topojson";
 import { saveAs } from "file-saver";
 import tokml from "tokml";
-import githubBrowser from "./file_browser.js";
-import gistBrowser from "@mapbox/gist-map-browser";
 import geojsonNormalize from "geojson-normalize";
 import wellknown from "wellknown";
 import config from "../config.js";
-import readFile from "../lib/readfile";
 import geojsonRandom from "geojson-random";
 import geojsonExtent from "geojson-extent";
 import geojsonFlatten from "geojson-flatten";
@@ -108,12 +104,12 @@ export default class FileBar extends React.Component {
   };
 
   downloadShp = () => {
-    d3.select(".map").classed("loading", true);
-    try {
-      shpwrite.download(context.data.get("map"));
-    } finally {
-      d3.select(".map").classed("loading", false);
-    }
+    // d3.select(".map").classed("loading", true);
+    // try {
+    //   shpwrite.download(context.data.get("map"));
+    // } finally {
+    //   d3.select(".map").classed("loading", false);
+    // }
   };
 
   downloadWKT = () => {
