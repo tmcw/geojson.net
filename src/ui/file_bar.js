@@ -2,7 +2,6 @@ import React from "react";
 import L from "leaflet";
 import shpwrite from "shp-write";
 import wkx from "wkx";
-import clone from "clone";
 import geojson2dsv from "geojson2dsv";
 import togpx from "togpx";
 import polyline from "@mapbox/polyline";
@@ -46,7 +45,7 @@ export default class FileBar extends React.Component {
     var content = JSON.stringify(
       topojson.topology(
         {
-          collection: clone(geojson)
+          collection: JSON.parse(JSON.stringify(geojson))
         },
         {
           "property-transform": function(properties, key, value) {
