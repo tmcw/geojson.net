@@ -50,7 +50,13 @@ class App extends React.Component {
     githubModal: false,
     geojson: initialGeojson,
     changeFrom: undefined,
-    dropzoneActive: false
+    dropzoneActive: false,
+    showPanel: true
+  };
+  togglePanel = () => {
+    this.setState(({ showPanel }) => ({
+      showPanel: !showPanel
+    }));
   };
   setMode = mode => {
     this.setState({ mode });
@@ -102,9 +108,10 @@ class App extends React.Component {
       githubModal,
       accept,
       files,
-      dropzoneActive
+      dropzoneActive,
+      showPanel
     } = this.state;
-    const { setGeojson, setLayer, setMode } = this;
+    const { setGeojson, setLayer, setMode, togglePanel } = this;
     return (
       <ApolloProvider client={client}>
         <Dropzone
@@ -116,7 +123,9 @@ class App extends React.Component {
         >
           <div className="f6 sans-serif fw6">
             <div className="vh-100 flex">
-              <div className="w-50 flex flex-column z-0">
+              <div
+                className={`w-${showPanel ? "50" : "100"} flex flex-column z-0`}
+              >
                 <div className="bg-white flex justify-between bb">
                   <FileBar
                     geojson={geojson}
@@ -130,26 +139,34 @@ class App extends React.Component {
                   geojson={geojson}
                   setGeojson={setGeojson}
                   changeFrom={changeFrom}
+                  showPanel={showPanel}
                 />
-                <LayerSwitch layer={layer} setLayer={setLayer} />
-              </div>
-              <div className="w-50 bl flex flex-column">
-                <div
-                  className="bg-white flex justify-between bb"
-                  style={{
-                    flexShrink: 0
-                  }}
-                >
-                  <ModeButtons mode={mode} setMode={setMode} />
-                  {/* <User /> */}
+                <div className="flex justify-between bt">
+                  <LayerSwitch layer={layer} setLayer={setLayer} />
+                  <span onClick={this.togglePanel}>
+                    {showPanel ? "▷" : "◁"}
+                  </span>
                 </div>
-                <Panel
-                  mode={mode}
-                  geojson={geojson}
-                  setGeojson={setGeojson}
-                  changeFrom={changeFrom}
-                />
               </div>
+              {showPanel && (
+                <div className="w-50 bl flex flex-column">
+                  <div
+                    className="bg-white flex justify-between bb"
+                    style={{
+                      flexShrink: 0
+                    }}
+                  >
+                    <ModeButtons mode={mode} setMode={setMode} />
+                    {/* <User /> */}
+                  </div>
+                  <Panel
+                    mode={mode}
+                    geojson={geojson}
+                    setGeojson={setGeojson}
+                    changeFrom={changeFrom}
+                  />
+                </div>
+              )}
               {/*githubModal && <GithubModal /> */}
             </div>
           </div>
