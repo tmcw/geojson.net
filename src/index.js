@@ -86,47 +86,49 @@ class App extends React.Component {
     const { setGeojson, setLayer, setMode, setGeojsonObject } = this;
     return (
       <ApolloProvider client={client}>
-        <div className="vh-100 flex sans-serif black-70">
-          <div className="w-50 flex flex-column z-0">
-            <div className="bg-white pt2 ph2 flex justify-between">
-              <FileBar
+        <div className="f6">
+          <div className="vh-100 flex sans-serif">
+            <div className="w-50 flex flex-column z-0">
+              <div className="bg-white flex justify-between bb">
+                <FileBar
+                  geojson={geojson}
+                  geojsonObject={geojsonObject}
+                  setGeojson={setGeojson}
+                  setGeojsonObject={setGeojsonObject}
+                  toggleGithubModal={this.toggleGithubModal}
+                />
+              </div>
+              <Map
+                layer={layer}
                 geojson={geojson}
-                geojsonObject={geojsonObject}
                 setGeojson={setGeojson}
                 setGeojsonObject={setGeojsonObject}
-                toggleGithubModal={this.toggleGithubModal}
+              />
+              <LayerSwitch layer={layer} setLayer={setLayer} />
+            </div>
+            <div className="w-50 bl flex flex-column">
+              <div
+                className="bg-white flex justify-between bb"
+                style={{
+                  flexShrink: 0
+                }}
+              >
+                <ModeButtons mode={mode} setMode={setMode} />
+                {/* <User /> */}
+              </div>
+              <Panel
+                mode={mode}
+                geojson={geojson}
+                setGeojson={setGeojson}
+                changeFrom={changeFrom}
               />
             </div>
-            <Map
-              layer={layer}
-              geojson={geojson}
-              setGeojson={setGeojson}
-              setGeojsonObject={setGeojsonObject}
-            />
-            <LayerSwitch layer={layer} setLayer={setLayer} />
+            {/*githubModal && <GithubModal /> */}
           </div>
-          <div className="w-50 bl b--black-10 bg-light-gray flex flex-column">
-            <div
-              className="bg-white pt2 ph2 flex justify-between bb b--black-20"
-              style={{
-                flexShrink: 0
-              }}
-            >
-              <ModeButtons mode={mode} setMode={setMode} />
-              <User />
-            </div>
-            <Panel
-              mode={mode}
-              geojson={geojson}
-              setGeojson={setGeojson}
-              changeFrom={changeFrom}
-            />
-          </div>
-          {githubModal && <GithubModal />}
         </div>
       </ApolloProvider>
     );
   }
 }
 
-ReactDOM.render(<App />, document.getElementById("geojsonio"));
+ReactDOM.render(<App />, document.getElementById("geojsonnet"));

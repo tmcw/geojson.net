@@ -8,7 +8,6 @@ import Popup from "./popup";
 import geojsonRewind from "geojson-rewind";
 import simplestyle from "./simplestyle";
 var makiValues = require("../../data/maki.json");
-import LGeo from "leaflet-geodesy";
 
 let maki = "";
 for (var i = 0; i < makiValues.length; i++) {
@@ -39,9 +38,7 @@ export default class Map extends React.Component {
       navigator.language !== "en-us" && navigator.language !== "en-US";
     map.setView([20, 0], 2);
 
-    map.attributionControl.setPrefix(
-      '<a target="_blank" href="http://geojson.net/about.html">About</a>'
-    );
+    map.attributionControl.setPrefix("");
 
     map.removeLayer(mapLayer);
     const baseLayerGroup = L.layerGroup().addTo(map);

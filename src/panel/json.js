@@ -1,6 +1,7 @@
 import React from "react";
 import CodeMirror from "codemirror";
 import jsMode from "codemirror/mode/javascript/javascript";
+import matchBrackets from "codemirror/addon/edit/matchbrackets";
 import stringify from "json-stringify-pretty-compact";
 import zoomextent from "../lib/zoomextent";
 import { hint } from "@mapbox/geojsonhint";
@@ -101,7 +102,7 @@ export default class Code extends React.Component {
       autofocus: window === window.top,
       keyMap: "tabSpace",
       lineNumbers: true,
-      theme: "neat"
+      theme: "idea"
     });
     editor.setValue(geojson);
     editor.on("change", this.maybeChange);

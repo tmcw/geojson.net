@@ -1,0 +1,72 @@
+body {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sans-serif, button {
+  font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, helvetica neue, helvetica, Ubuntu, roboto, noto, segoe ui, arial, sans-serif;
+}
+
+.disappear-child .child {
+  display: none;
+}
+.disappear-child:hover  .child,
+.disappear-child:focus  .child,
+.disappear-child:active .child {
+  display: block;
+}
+
+.CodeMirror {
+  font-family: Menlo, Consolas, Monaco, Liberation Mono, Lucida Console, monospace;
+  font-size: 14px;
+  line-height: 20px;
+  height: auto;
+  flex: 1 1 auto;
+}
+
+.error-marker {
+  width:10px;
+  height:1.5em;
+  background:#EAB;
+  transition:all 100ms;
+  -webkit-transition:all 100ms;
+}
+
+.error-marker:hover {
+    background:#D68;
+}
+
+.error-marker:before {
+    opacity:0;
+    pointer-events:none;
+    content:attr(message);
+    transition:all 100ms;
+    -webkit-transition:all 100ms;
+    content:attr(message);
+    width:300px;
+    font-size:10px;
+    padding:5px;
+    border:1px solid #000;
+    position:absolute;
+    background:#fff;
+    z-index:999;
+}
+
+.error-marker:hover:before {
+    opacity:1;
+    margin-left:35px;
+}
+
+div#geojsonnet .leaflet-bar,
+div#geojsonnet .leaflet-bar a {
+  border: none;
+  border-radius: 0;
+}
+
+div#geojsonnet .leaflet-bar a {
+  background: var(--white);
+}
+
+div#geojsonnet .leaflet-bar a:hover {
+  background: var(--yellow);
+}

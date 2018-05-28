@@ -121,11 +121,7 @@ export default class FileBar extends React.Component {
     var features = geojsonObject.features;
     if (features.length === 0) return;
     var content = features.map(wellknown.stringify).join("\n");
-    this.download(
-      content,
-      "map.wkt",
-      "text/plain;charset=utf-8"
-    );
+    this.download(content, "map.wkt", "text/plain;charset=utf-8");
   };
 
   render() {
@@ -297,7 +293,7 @@ export default class FileBar extends React.Component {
           title: "File",
           alt: "GeoJSON, TopoJSON, GTFS, KML, CSV, GPX and OSM XML supported",
           action: this.blindImport
-        },
+        } /*,
         {
           title: "GitHub",
           alt: "GeoJSON files in GitHub Repositories",
@@ -309,7 +305,7 @@ export default class FileBar extends React.Component {
           alt: "GeoJSON files in GitHub Gists",
           authenticated: true,
           action: () => {}
-        }
+        } */
       ]
     });
 
@@ -321,14 +317,15 @@ export default class FileBar extends React.Component {
               key={i}
               style={{ zIndex: 999 }}
               onClick={item.action}
-              className="db bn pv1 ph2 br2 br--top outline-0 disappear-child relative pointer black-50 hover-black f6"
+              className="db bn pa2 outline-0 disappear-child relative pointer black hover-bg-yellow "
             >
               {item.title}
               {item.children ? (
                 <div
-                  className="child bg-white absolute w4"
+                  className="child bg-white absolute w4 bt pv2"
                   style={{
-                    top: 24
+                    top: 32,
+                    left: 0
                   }}
                 >
                   {item.children.map((child, i) => {
@@ -336,7 +333,7 @@ export default class FileBar extends React.Component {
                       <div
                         onClick={child.action}
                         key={i}
-                        className={`bn pv1 ph2 outline-0 tl f6 db hover-bg-blue hover-white w-100 pointer`}
+                        className={`bn pv1 ph2 outline-0 tl db hover-bg-yellow w-100 pointer`}
                       >
                         {child.title}
                       </div>
