@@ -3,12 +3,12 @@ import L from "leaflet";
 import { layers } from "../layers";
 
 export default ({ layer, setLayer }) => (
-  <div className="flex">
+  <div className="flex overflow-x-scroll">
     {layers.map(({ id, title }) => (
       <span
         key={id}
         onClick={() => setLayer(id)}
-        className={`db pointer bn pa2 outline-0 ${
+        className={`db pointer bn pa2 nowrap outline-0 ${
           layer === id ? "bg-yellow" : ""
         }`}
       >

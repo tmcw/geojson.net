@@ -25,5 +25,62 @@ export const layers = [
       attribution:
         '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
     })
+  },
+  {
+    title: "Wikimedia",
+    id: "wikimedia",
+    layer: L.tileLayer(
+      "https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}@2x.png",
+      {
+        attribution:
+          '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+      }
+    )
+  },
+  {
+    title: "HOT",
+    id: "hot",
+    layer: L.tileLayer("http://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+    })
+  },
+  {
+    title: "Toner",
+    id: "toner",
+    layer: L.tileLayer("http://a.tile.stamen.com/toner/{z}/{x}/{y}@2x.png", {
+      attribution:
+        '&copy; Stamen, <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+    })
+  },
+  {
+    title: "Watercolor",
+    id: "watercolor",
+    layer: L.tileLayer("http://a.tile.stamen.com/watercolor/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; Stamen, <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+    })
+  },
+  {
+    title: "Positron",
+    id: "positron",
+    layer: L.tileLayer(
+      "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}@2x.png",
+      {
+        attribution:
+          '&copy; Carto, <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+      }
+    )
+  },
+  {
+    title: "Dark Matter",
+    id: "dark",
+    layer: L.tileLayer(
+      "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}@2x.png",
+      {
+        attribution:
+          '&copy; Carto, <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+      }
+    )
   }
 ];
