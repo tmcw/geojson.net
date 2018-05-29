@@ -204,13 +204,17 @@ export default class extends React.Component {
     return (
       <div
         className="absolute absolute--fill bg-black-50 pa4"
+        id="backdrop"
+        onClick={e => {
+          if (e.target.id === "backdrop") toggleGithubModal();
+        }}
         style={{
           zIndex: 998
         }}
       >
         <div className="relative">
           <div
-            className="bg-white flex items-stretch"
+            className="bg-white flex items-stretch ba"
             style={{
               zIndex: 999
             }}
