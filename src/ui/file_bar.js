@@ -8,9 +8,10 @@ import polyline from "@mapbox/polyline";
 import topojson from "topojson";
 import { saveAs } from "file-saver";
 import tokml from "tokml";
-import geojsonNormalize from "geojson-normalize";
+import geojsonNormalize from "@mapbox/geojson-normalize";
 import wellknown from "wellknown";
 import config from "../config.js";
+import magicFile from "../lib/magic_file";
 import geojsonRandom from "geojson-random";
 import geojsonExtent from "geojson-extent";
 import geojsonFlatten from "geojson-flatten";
@@ -25,19 +26,13 @@ export default class FileBar extends React.Component {
   };
   onFileInputChange = e => {
     const { setGeojson } = this.props;
-    const { files } = e.target;
-    if (!(files && files[0])) return;
-    readFile.readAsText(files[0], function(err, text) {
-      const result = readFile.readFile(files[0], text);
-      if (result instanceof Error) {
-      } else {
-        setGeojson(result);
-      }
-      if (files[0].path) {
-        // context.data.set({
-        //   path: files[0].path
-        // });
-      }
+    const {
+      files: [file]
+    } = e.target;
+    const reader = new FileReader();
+    reader.readAsText(file);
+    reader.addEventListener("load", () => {
+      setGeojson(magicFile(reader.result));
     });
   };
   downloadTopo = () => {

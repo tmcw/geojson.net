@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`magicFile gpx 1`] = `
+Object {
+  "features": Array [
+    Object {
+      "geometry": Object {
+        "coordinates": Array [
+          Array [
+            2.665278,
+            10.228889,
+          ],
+          Array [
+            2.933333,
+            11.133333,
+          ],
+        ],
+        "type": "LineString",
+      },
+      "properties": Object {
+        "type": "NC",
+      },
+      "type": "Feature",
+    },
+  ],
+  "type": "FeatureCollection",
+}
+`;
+
+exports[`magicFile gtfs 1`] = `
+Object {
+  "features": Array [
+    Object {
+      "geometry": Object {
+        "coordinates": Array [
+          Array [
+            -122.48161,
+            37.61956,
+          ],
+          Array [
+            -122.4107,
+            37.6443,
+          ],
+          Array [
+            -122.30839,
+            37.65863,
+          ],
+        ],
+        "type": "LineString",
+      },
+      "id": "A_shp",
+      "properties": Object {
+        "shape_id": "A_shp",
+      },
+      "type": "Feature",
+    },
+  ],
+  "type": "FeatureCollection",
+}
+`;
+
+exports[`magicFile gtfs 2`] = `
+Object {
+  "features": Array [
+    Object {
+      "geometry": Object {
+        "coordinates": Array [
+          -73.888153,
+          40.872562,
+        ],
+        "type": "Point",
+      },
+      "id": "100014",
+      "properties": Object {
+        "stop_id": "100014",
+        "stop_name": "BEDFORD PK BL/GRAND CONCOURSE",
+      },
+      "type": "Feature",
+    },
+    Object {
+      "geometry": Object {
+        "coordinates": Array [
+          -73.889656,
+          40.876808,
+        ],
+        "type": "Point",
+      },
+      "id": "100017",
+      "properties": Object {
+        "stop_id": "100017",
+        "stop_name": "PAUL AV/W 205 ST",
+      },
+      "type": "Feature",
+    },
+    Object {
+      "geometry": Object {
+        "coordinates": Array [
+          -73.886063,
+          40.880341,
+        ],
+        "type": "Point",
+      },
+      "id": "100018",
+      "properties": Object {
+        "stop_id": "100018",
+        "stop_name": "PAUL AV/W MOSHOLU PY S",
+      },
+      "type": "Feature",
+    },
+    Object {
+      "geometry": Object {
+        "coordinates": Array [
+          -73.929489,
+          40.813496,
+        ],
+        "type": "Point",
+      },
+      "id": "100019",
+      "properties": Object {
+        "stop_id": "100019",
+        "stop_name": "GRAND CONCOURSE/E 138 ST",
+      },
+      "type": "Feature",
+    },
+    Object {
+      "geometry": Object {
+        "coordinates": Array [
+          -73.927956,
+          40.816803,
+        ],
+        "type": "Point",
+      },
+      "id": "100020",
+      "properties": Object {
+        "stop_id": "100020",
+        "stop_name": "GRAND CONCOURSE/E 144 ST",
+      },
+      "type": "Feature",
+    },
+  ],
+  "type": "FeatureCollection",
+}
+`;
+
+exports[`magicFile kml 1`] = `
+Object {
+  "features": Array [
+    Object {
+      "geometry": Object {
+        "coordinates": Array [
+          -122.0822035425683,
+          37.42228990140251,
+          0,
+        ],
+        "type": "Point",
+      },
+      "properties": Object {
+        "description": "Attached to the ground. Intelligently places itself 
+       at the height of the underlying terrain.",
+        "name": "Simple placemark",
+      },
+      "type": "Feature",
+    },
+  ],
+  "type": "FeatureCollection",
+}
+`;
+
+exports[`magicFile osm 1`] = `undefined`;

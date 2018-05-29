@@ -15,6 +15,7 @@ import { ApolloLink } from "apollo-link";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { ApolloProvider } from "react-apollo";
 import Dropzone from "react-dropzone";
+import magicFile from "./lib/magic_file";
 
 const { access_token } = querystring.parse(location.search.replace(/^\?/, ""));
 
@@ -94,7 +95,7 @@ class App extends React.Component {
     const reader = new FileReader();
     reader.readAsText(file);
     reader.addEventListener("load", () => {
-      setGeojson(JSON.parse(reader.result));
+      setGeojson(magicFile(reader.result));
     });
   };
   render() {
