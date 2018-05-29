@@ -182,11 +182,12 @@ export default class FileBar extends React.Component {
               var count = parseInt(response, 10);
               if (isNaN(count)) count = 100;
               const fc = geojsonNormalize(geojson);
-              fc.features.push.apply(
-                fc.features,
-                geojsonRandom(count, "point").features
-              );
-              setGeojson(fc);
+              setGeojson({
+                type: "FeatureCollection",
+                features: fc.features.concat(
+                  geojsonRandom.point(count).features
+                )
+              });
             }
           },
           {
