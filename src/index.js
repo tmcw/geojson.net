@@ -158,7 +158,7 @@ class App extends React.Component {
                     }}
                   >
                     <ModeButtons mode={mode} setMode={setMode} />
-                    {/* <User /> */}
+                    <User />
                   </div>
                   <Panel
                     mode={mode}

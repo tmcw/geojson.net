@@ -30,15 +30,16 @@ export default class User extends React.Component {
           if (error)
             return (
               <a
-                className="black-50 no-underline f6 disappear-child relative"
+                className="no-underline disappear-child relative pa2 black hover-bg-yellow"
                 href={`${config}/login?scope=${
                   privateRepoPermissions ? "repo" : "public_repo"
                 },read:org`}
               >
-                log in
+                Log in
                 <div
-                  className="child absolute right-0 bg-near-white pa2"
+                  className="child absolute right-0 bg-white pa2 ba w4"
                   style={{
+                    top: 32,
                     zIndex: 999
                   }}
                 >
@@ -48,18 +49,16 @@ export default class User extends React.Component {
                     onChange={this.setPrivateRepoPermissions}
                     checked={this.privateRepoPermissions}
                   />{" "}
-                  <label htmlFor="privateRepoPermissions">
-                    Private repo permissions
-                  </label>
+                  <label htmlFor="privateRepoPermissions">private repos</label>
                 </div>
               </a>
             );
           return (
-            <div className="inline-flex">
-              <img src={data.viewer.avatarUrl} className="w1 h1 mr1" />
+            <div className="inline-flex items-center">
+              <img src={data.viewer.avatarUrl} className="w2 h2 mr2" />
               {data.viewer.login}
               <a
-                className="pl2 ml2 b--black-10 bl pointer"
+                className="ph2 pointer hover-bg-yellow pa2 ml2"
                 onClick={() => {
                   localStorage.removeItem("githubToken");
                   location.reload();
