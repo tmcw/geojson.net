@@ -2,10 +2,32 @@ import React from "react";
 import CodeMirror from "codemirror";
 import jsMode from "codemirror/mode/javascript/javascript";
 import matchBrackets from "codemirror/addon/edit/matchbrackets";
-import stringify from "json-stringify-pretty-compact";
+import compact from "json-stringify-pretty-compact";
 import zoomextent from "../lib/zoomextent";
 import { hint } from "@mapbox/geojsonhint";
 import equal from "deep-equal";
+
+const copyAvailable = (() => {
+  return (
+    !!document.queryCommandSupported && document.queryCommandSupported("copy")
+  );
+})();
+
+function copy(text) {
+  var fakeElem = document.body.appendChild(document.createElement("textarea"));
+  fakeElem.style.position = "absolute";
+  fakeElem.style.left = "-9999px";
+  fakeElem.setAttribute("readonly", "");
+  fakeElem.value = text;
+  fakeElem.select();
+  try {
+    return document.execCommand("copy");
+  } catch (err) {
+    return false;
+  } finally {
+    fakeElem.parentNode.removeChild(fakeElem);
+  }
+}
 
 function maybeParse(str) {
   try {
@@ -15,9 +37,15 @@ function maybeParse(str) {
   }
 }
 
+const formatters = {
+  compact,
+  stringify: val => JSON.stringify(val, null, 2)
+};
+
 export default class Code extends React.Component {
   state = {
-    error: undefined
+    error: undefined,
+    formatFn: "compact"
   };
   constructor(props) {
     super(props);
@@ -91,6 +119,7 @@ export default class Code extends React.Component {
     return div;
   }
   componentDidMount() {
+    const { formatFn } = this.state;
     const { geojson } = this.props;
     const node = this.codeMirrorContainer.current;
 
@@ -113,24 +142,61 @@ export default class Code extends React.Component {
       lineNumbers: true,
       theme: "idea"
     });
-    editor.setValue(stringify(geojson));
+    editor.setValue(formatters[formatFn](geojson));
     editor.on("change", this.maybeChange);
     this.setState({
       editor
     });
   }
-  componentDidUpdate(prevProps) {
-    const { editor } = this.state;
+  componentDidUpdate(prevProps, prevState) {
+    const { editor, formatFn } = this.state;
     const { geojson, changeFrom } = this.props;
-    if (changeFrom !== "cm" && geojson !== prevProps.geojson) {
+    if (
+      (changeFrom !== "cm" && geojson !== prevProps.geojson) ||
+      formatFn !== prevState.formatFn
+    ) {
       editor.off("change", this.maybeChange);
-      editor.setValue(stringify(geojson));
+      editor.setValue(formatters[formatFn](geojson));
       editor.on("change", this.maybeChange);
     }
   }
+  copy = () => {
+    const { editor } = this.state;
+    copy(editor.getValue());
+  };
+  setFormatFn = e => {
+    this.setState({
+      formatFn: e.target.value
+    });
+  };
   render() {
+    const { formatFn } = this.state;
+    const { copy } = this;
     return (
-      <div className="flex-auto flex fw5" ref={this.codeMirrorContainer} />
+      <div className="flex flex-auto flex-column">
+        <div className="flex-auto flex fw5" ref={this.codeMirrorContainer} />
+        <div className="bt inline-flex items-center">
+          {copyAvailable && (
+            <span className="db pointer bn pa2 hover-bg-yellow" onClick={copy}>
+              Copy to clipboard
+            </span>
+          )}
+          <div className="ml1">
+            <select
+              onChange={this.setFormatFn}
+              value={formatFn}
+              className="ml1 bg-white"
+              style={{
+                fontFamily: "inherit",
+                fontWeight: "inherit"
+              }}
+            >
+              <option value="compact">compact format</option>
+              <option value="stringify">JSON.stringify</option>
+            </select>
+          </div>
+        </div>
+      </div>
     );
   }
 }

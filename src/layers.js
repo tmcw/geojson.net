@@ -25,7 +25,7 @@ export const layers = [
       attribution:
         '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
     })
-  },
+  } /*,
   {
     title: "Wikimedia",
     id: "wikimedia",
@@ -83,4 +83,5 @@ export const layers = [
       }
     )
   }
+  */
 ];

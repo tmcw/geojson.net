@@ -3,7 +3,7 @@ import L from "leaflet";
 import { layers } from "../layers";
 
 export default ({ layer, setLayer }) => (
-  <div className="flex overflow-x-scroll">
+  <div className="flex">
     {layers.map(({ id, title }) => (
       <span
         key={id}
