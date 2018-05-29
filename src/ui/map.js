@@ -211,8 +211,18 @@ export default class Map extends React.Component {
       featuresLayer.addLayer(layer);
       // layer must be added before editing can be enabled.
       layer.enableEdit();
+      layer.on("click", this.clickPolygon);
     });
     this.updateFromMap(e);
+  };
+  clickPolygon = e => {
+    const { target } = e;
+    if (
+      (e.originalEvent.ctrlKey || e.originalEvent.metaKey) &&
+      target.editEnabled()
+    ) {
+      target.editor.newHole(e.latlng);
+    }
   };
   updateFromMap = () => {
     const {
