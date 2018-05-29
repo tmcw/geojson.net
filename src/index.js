@@ -8,6 +8,7 @@ import ModeButtons from "./ui/mode_buttons";
 import User from "./ui/user";
 import Map from "./ui/map";
 import GithubModal from "./ui/github_modal";
+import GistModal from "./ui/gist_modal";
 import Panel from "./panel/index";
 import ApolloClient from "apollo-client";
 import { createHttpLink } from "apollo-link-http";
@@ -49,6 +50,7 @@ class App extends React.Component {
     mode: "code",
     layer: "mapbox",
     githubModal: false,
+    gistModal: false,
     geojson: initialGeojson,
     changeFrom: undefined,
     dropzoneActive: false,
@@ -63,9 +65,14 @@ class App extends React.Component {
     this.setState({ mode });
   };
   toggleGithubModal = () => {
-    this.setState(({ githubModal }) => {
-      githubModal: !githubModal;
-    });
+    this.setState(({ githubModal }) => ({
+      githubModal: !githubModal
+    }));
+  };
+  toggleGistModal = () => {
+    this.setState(({ gistModal }) => ({
+      gistModal: !gistModal
+    }));
   };
   setLayer = layer => {
     this.setState({ layer });
@@ -107,6 +114,7 @@ class App extends React.Component {
       map,
       mode,
       githubModal,
+      gistModal,
       accept,
       files,
       dropzoneActive,
@@ -133,6 +141,7 @@ class App extends React.Component {
                     geojsonObject={geojsonObject}
                     setGeojson={setGeojson}
                     toggleGithubModal={this.toggleGithubModal}
+                    toggleGistModal={this.toggleGistModal}
                   />
                 </div>
                 <Map
@@ -168,7 +177,10 @@ class App extends React.Component {
                   />
                 </div>
               )}
-              {/*githubModal && <GithubModal /> */}
+              {githubModal && (
+                <GithubModal toggleGithubModal={this.toggleGithubModal} />
+              )}
+              {gistModal && <GistModal />}
             </div>
           </div>
           {dropzoneActive && (

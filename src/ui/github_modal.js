@@ -58,13 +58,16 @@ const Import = ({ id }) => (
       ) : !data ? (
         "error"
       ) : (
-        <div
-          style={{
-            maxHeight: 320
-          }}
-          className="overflow-y-scroll overflow-x-hidden w5"
-        >
-          {data.node.text ? data.node.text : "No files"}
+        <div className="flex flex-column">
+          <div className="overflow-y-scroll overflow-x-hidden w5 pre code pa2 fw5 flex-auto">
+            {data.node.text ? data.node.text : "No files"}
+          </div>
+          <div
+            className="pa2 hover-bg-yellow bt pointer"
+            onClick={() => this.props.importFiles(data.node.text)}
+          >
+            Import
+          </div>
         </div>
       )
     }
@@ -89,7 +92,7 @@ const FileBrowser = ({ repository, clickFile }) => (
             ? data.node.object.entries.map(entry => (
                 <div
                   onClick={() => clickFile(entry)}
-                  className="f6 bb b--black-10 pointer hover-bg-washed-blue pa1"
+                  className="bb pointer hover-bg-yellow pa2"
                 >
                   {entry.name}
                 </div>
@@ -117,11 +120,10 @@ const RepoBrowser = ({ setRepository }) => (
         >
           {data.viewer.repositories.edges.map(repo => (
             <div
-              className="f6 bb b--black-10 pointer hover-bg-washed-blue pa1"
+              className="bb pointer hover-bg-yellow pa1 pa2"
               onClick={() => setRepository(repo.node.id)}
             >
               <div>{repo.node.name}</div>
-              <div className="black-50">{repo.node.description}</div>
             </div>
           ))}
         </div>
@@ -150,6 +152,7 @@ export default class extends React.Component {
   };
   render() {
     const { repository, prospectiveImportId } = this.state;
+    const { toggleGithubModal } = this.props;
     const { clickFile, setRepository } = this;
     return (
       <div
@@ -158,17 +161,25 @@ export default class extends React.Component {
           zIndex: 998
         }}
       >
-        <div
-          className="bg-white pa3 flex"
-          style={{
-            zIndex: 999
-          }}
-        >
-          <RepoBrowser setRepository={setRepository} />
-          {repository && (
-            <FileBrowser repository={repository} clickFile={clickFile} />
-          )}
-          {prospectiveImportId && <Import id={prospectiveImportId} />}
+        <div className="relative">
+          <div
+            className="bg-white flex items-stretch"
+            style={{
+              zIndex: 999
+            }}
+          >
+            <RepoBrowser setRepository={setRepository} />
+            {repository && (
+              <FileBrowser repository={repository} clickFile={clickFile} />
+            )}
+            {prospectiveImportId && <Import id={prospectiveImportId} />}
+          </div>
+          <span
+            onClick={toggleGithubModal}
+            className="absolute top-0 right-0 pa2 hover-bg-yellow pointer"
+          >
+            close
+          </span>
         </div>
       </div>
     );

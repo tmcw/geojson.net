@@ -284,19 +284,20 @@ export default class FileBar extends React.Component {
           title: "File",
           alt: "GeoJSON, TopoJSON, GTFS, KML, CSV, GPX and OSM XML supported",
           action: this.blindImport
-        } /*,
+        },
+        ,
+        /*{
+          title: "Gist",
+          alt: "GeoJSON files in GitHub Gists",
+          authenticated: true,
+          action: this.props.toggleGistModal
+        }*/
         {
           title: "GitHub",
           alt: "GeoJSON files in GitHub Repositories",
           authenticated: true,
           action: this.props.toggleGithubModal
-        },
-        {
-          title: "Gist",
-          alt: "GeoJSON files in GitHub Gists",
-          authenticated: true,
-          action: () => {}
-        } */
+        }
       ]
     });
 
