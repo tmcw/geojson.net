@@ -27,7 +27,10 @@
 .cm-s-idea span.cm-bracket { color: #cc7; }
 .cm-s-idea  { font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;}
 
-.cm-s-idea .CodeMirror-matchingbracket { outline:1px solid grey; color:black !important; }
+.cm-s-idea .CodeMirror-matchingbracket {
+  background: var(--blue);
+  color: var(--white) !important;
+}
 
 .cm-s-idea .CodeMirror-gutters {
   background-color: var(--near-white);

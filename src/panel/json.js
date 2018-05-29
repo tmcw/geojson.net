@@ -129,6 +129,8 @@ export default class Code extends React.Component {
     }
   }
   render() {
-    return <div className="flex-auto flex" ref={this.codeMirrorContainer} />;
+    return (
+      <div className="flex-auto flex fw5" ref={this.codeMirrorContainer} />
+    );
   }
 }

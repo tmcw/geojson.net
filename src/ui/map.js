@@ -11,6 +11,12 @@ import iconRetinaUrl from "../../css/marker-icon-2x.png";
 import iconUrl from "../../css/marker-icon.png";
 import shadowUrl from "../../css/marker-shadow.png";
 
+const polygon = <path d="M15 6l8.56 6.219-3.27 10.062H9.71L6.44 12.22z" />;
+const line = <path d="M6 7l8.31 3.99v7.822l8.31 4.746" />;
+const rectangle = <path d="M7.5 7.5h15v15h-15z" />;
+const point = (
+  <path d="M15 24.152L7 13.015c-.747-4.83 1.92-7.246 8-7.246s8.747 2.415 8 7.246l-8 11.137z" />
+);
 
 L.Marker.prototype.options.icon = new L.Icon({
   iconUrl,
@@ -59,17 +65,31 @@ export default class Map extends React.Component {
       options: {
         position: "topleft",
         callback: null,
-        kind: "",
-        html: ""
+        kind: ""
       },
 
       onAdd: function(map) {
-        var container = L.DomUtil.create("div", "leaflet-control leaflet-bar"),
+        var container = L.DomUtil.create(
+            "div",
+            "leaflet-control leaflet-bar bg-white black hover-bg-purple hover-white"
+          ),
           link = L.DomUtil.create("a", "", container);
 
         link.href = "#";
         link.title = "Create a new " + this.options.kind;
-        link.innerHTML = this.options.html;
+        const iconContainer = link.appendChild(document.createElement("div"));
+        ReactDOM.render(
+          <svg
+            stroke="currentColor"
+            strokeWidth="2.5"
+            fill="none"
+            width="30"
+            height="30"
+          >
+            {this.options.icon}
+          </svg>,
+          iconContainer
+        );
         L.DomEvent.on(link, "click", L.DomEvent.stop).on(
           link,
           "click",
@@ -88,7 +108,7 @@ export default class Map extends React.Component {
         position: "topright",
         callback: map.editTools.startPolyline,
         kind: "line",
-        html: "\\/\\"
+        icon: line
       }
     });
 
@@ -97,7 +117,7 @@ export default class Map extends React.Component {
         position: "topright",
         callback: map.editTools.startPolygon,
         kind: "polygon",
-        html: "▰"
+        icon: polygon
       }
     });
 
@@ -106,7 +126,7 @@ export default class Map extends React.Component {
         position: "topright",
         callback: map.editTools.startMarker,
         kind: "marker",
-        html: "🖈"
+        icon: point
       }
     });
 
@@ -115,7 +135,7 @@ export default class Map extends React.Component {
         position: "topright",
         callback: map.editTools.startRectangle,
         kind: "rectangle",
-        html: "⬛"
+        icon: rectangle
       }
     });
 

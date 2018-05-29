@@ -27,7 +27,7 @@ body {
 .error-marker {
   width:10px;
   height:1.5em;
-  background:#EAB;
+  background:var(--red);
   transition:all 100ms;
   -webkit-transition:all 100ms;
 }
@@ -44,7 +44,6 @@ body {
     -webkit-transition:all 100ms;
     content:attr(message);
     width:300px;
-    font-size:10px;
     padding:5px;
     border:1px solid #000;
     position:absolute;
