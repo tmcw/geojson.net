@@ -23,6 +23,19 @@ const FILE_QUERY = gql`
   }
 `;
 
+const ORG_QUERY = gql`
+  {
+    viewer {
+      organizations(first: 100) {
+        nodes {
+          name
+          id
+        }
+      }
+    }
+  }
+`;
+
 const REPO_QUERY = gql`
   query {
     viewer {
@@ -104,6 +117,35 @@ const FileBrowser = ({ repository, clickFile }) => (
   </Query>
 );
 
+const OrgBrowser = ({ setOrganization }) => (
+  <Query query={ORG_QUERY}>
+    {({ loading, error, data }) =>
+      loading ? (
+        "loading..."
+      ) : !data ? (
+        "error"
+      ) : (
+        <div
+          style={{
+            maxHeight: 320
+          }}
+          className="overflow-y-scroll w5 overflow-x-hidden"
+        >
+          {data.viewer.organizations.nodes.map(org => (
+            <div
+              key={org.id}
+              className="bb pointer hover-bg-yellow pa1 pa2"
+              onClick={() => setOrganization(org.id)}
+            >
+              <div>{org.name}</div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+  </Query>
+);
+
 const RepoBrowser = ({ setRepository }) => (
   <Query query={REPO_QUERY}>
     {({ loading, error, data }) =>
@@ -120,6 +162,7 @@ const RepoBrowser = ({ setRepository }) => (
         >
           {data.viewer.repositories.edges.map(repo => (
             <div
+              key={repo.node.id}
               className="bb pointer hover-bg-yellow pa1 pa2"
               onClick={() => setRepository(repo.node.id)}
             >
@@ -134,9 +177,13 @@ const RepoBrowser = ({ setRepository }) => (
 
 export default class extends React.Component {
   state = {
+    organization: undefined,
     repository: undefined,
     login: undefined,
     prospectiveImportId: undefined
+  };
+  setOrganization = organization => {
+    this.setState({ organization });
   };
   setRepository = repository => {
     this.setState({ repository });
@@ -153,7 +200,7 @@ export default class extends React.Component {
   render() {
     const { repository, prospectiveImportId } = this.state;
     const { toggleGithubModal } = this.props;
-    const { clickFile, setRepository } = this;
+    const { clickFile, setRepository, setOrganization } = this;
     return (
       <div
         className="absolute absolute--fill bg-black-50 pa4"
@@ -168,6 +215,7 @@ export default class extends React.Component {
               zIndex: 999
             }}
           >
+            <OrgBrowser setOrganization={setOrganization} />
             <RepoBrowser setRepository={setRepository} />
             {repository && (
               <FileBrowser repository={repository} clickFile={clickFile} />
