@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import L from "leaflet";
+import "leaflet-hash";
 import "leaflet-editable";
 import marker from "../map/marker";
 import { layers } from "../layers";
@@ -49,7 +50,7 @@ export default class Map extends React.Component {
       .addTo(map);
     map.zoomControl.setPosition("topright");
 
-    // L.hash(map);
+    L.hash(map);
     const metric =
       navigator.language !== "en-us" && navigator.language !== "en-US";
 
