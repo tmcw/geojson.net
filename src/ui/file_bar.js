@@ -98,12 +98,8 @@ export default class FileBar extends React.Component {
   };
 
   downloadShp = () => {
-    // d3.select(".map").classed("loading", true);
-    // try {
-    //   shpwrite.download(context.data.get("map"));
-    // } finally {
-    //   d3.select(".map").classed("loading", false);
-    // }
+    const { geojson } = this.props;
+    shpwrite.download(geojson);
   };
 
   downloadWKT = () => {
@@ -132,6 +128,10 @@ export default class FileBar extends React.Component {
       {
         title: "CSV",
         action: this.downloadDSV
+      },
+      {
+        title: "Shapefile",
+        action: this.downloadShp
       },
       {
         title: "KML",
