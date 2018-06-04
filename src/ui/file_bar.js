@@ -9,6 +9,7 @@ import topojson from "topojson";
 import { saveAs } from "file-saver";
 import tokml from "tokml";
 import geojsonNormalize from "@mapbox/geojson-normalize";
+import simplify from "@turf/simplify";
 import wellknown from "wellknown";
 import config from "../config.js";
 import magicFile from "../lib/magic_file";
@@ -196,6 +197,14 @@ export default class FileBar extends React.Component {
             action: () => {
               const { setGeojson, geojson } = this.props;
               setGeojson(geojsonExtent.bboxify(geojson));
+            }
+          },
+          {
+            title: "Simplify",
+            alt: "Remove unnecessary detail from GeoJSON features",
+            action: () => {
+              const { setGeojson, geojson } = this.props;
+              setGeojson(simplify(geojson));
             }
           },
           {
