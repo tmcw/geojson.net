@@ -175,7 +175,12 @@ export default class Code extends React.Component {
     return (
       <div className="flex flex-auto flex-column">
         <div className="flex-auto flex fw5" ref={this.codeMirrorContainer} />
-        <div className="bt inline-flex items-center">
+        <div
+          className="bt inline-flex items-center"
+          style={{
+            flexShrink: "0"
+          }}
+        >
           {copyAvailable && (
             <span className="db pointer bn pa2 hover-bg-yellow" onClick={copy}>
               Copy to clipboard

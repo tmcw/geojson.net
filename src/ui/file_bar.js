@@ -16,6 +16,7 @@ import magicFile from "../lib/magic_file";
 import geojsonRandom from "geojson-random";
 import geojsonExtent from "geojson-extent";
 import geojsonFlatten from "geojson-flatten";
+import mergeGeojson from "../lib/merge_geojson";
 
 export default class FileBar extends React.Component {
   constructor(props) {
@@ -26,14 +27,20 @@ export default class FileBar extends React.Component {
     this.fileInputRef.current.click();
   };
   onFileInputChange = e => {
-    const { setGeojson } = this.props;
-    const {
-      files: [file]
-    } = e.target;
-    const reader = new FileReader();
-    reader.readAsText(file);
-    reader.addEventListener("load", () => {
-      setGeojson(magicFile(reader.result));
+    const { files } = e.target;
+    const { geojson, setGeojson } = this.props;
+    Promise.all(
+      [...files].map(file => {
+        return new Promise(resolve => {
+          const reader = new FileReader();
+          reader.readAsText(file);
+          reader.addEventListener("load", () =>
+            resolve(magicFile(reader.result))
+          );
+        });
+      })
+    ).then(geojsons => {
+      setGeojson(mergeGeojson([geojson, ...geojsons]));
     });
   };
   downloadTopo = () => {
@@ -348,6 +355,7 @@ export default class FileBar extends React.Component {
         <input
           type="file"
           className="dn"
+          multiple
           ref={this.fileInputRef}
           onChange={this.onFileInputChange}
         />
