@@ -17,6 +17,7 @@ import { InMemoryCache } from "apollo-cache-inmemory";
 import { ApolloProvider } from "react-apollo";
 import Dropzone from "react-dropzone";
 import magicFile from "./lib/magic_file";
+import mergeGeojson from "./lib/merge_geojson";
 
 const { access_token } = querystring.parse(location.search.replace(/^\?/, ""));
 
@@ -97,12 +98,20 @@ class App extends React.Component {
     this.importFiles(files);
   };
   importFiles = files => {
+    const { geojson } = this.state;
     const { setGeojson } = this;
-    const [file] = files;
-    const reader = new FileReader();
-    reader.readAsText(file);
-    reader.addEventListener("load", () => {
-      setGeojson(magicFile(reader.result));
+    Promise.all(
+      files.map(file => {
+        return new Promise(resolve => {
+          const reader = new FileReader();
+          reader.readAsText(file);
+          reader.addEventListener("load", () =>
+            resolve(magicFile(reader.result))
+          );
+        });
+      })
+    ).then(geojsons => {
+      setGeojson(mergeGeojson([geojson, ...geojsons]));
     });
   };
   render() {
