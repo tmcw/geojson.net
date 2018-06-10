@@ -1,5 +1,5 @@
 import React from "react";
-import Config from "../panel/config";
+import LayerConfig from "../panel/layer_config";
 
 export default ({onCancel, onSubmit}) => (
   <div
@@ -14,7 +14,7 @@ export default ({onCancel, onSubmit}) => (
         zIndex: 999
       }}
     >
-      <Config onCancel={onCancel} onSubmit={onSubmit}/>
+      <LayerConfig onCancel={onCancel} onSubmit={onSubmit}/>
     </div>
   </div>
 );

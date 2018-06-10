@@ -9,7 +9,7 @@ import User from "./ui/user";
 import Map from "./ui/map";
 import GithubModal from "./ui/github_modal";
 import GistModal from "./ui/gist_modal";
-import ConfigModal from "./ui/config_modal";
+import ConfigModal from "./ui/layer_modal";
 import Panel from "./panel/index";
 import ApolloClient from "apollo-client";
 import { createHttpLink } from "apollo-link-http";

@@ -1,5 +1,5 @@
 import Table from "../src/panel/table";
-import Config from "../src/panel/config";
+import Config from "../src/panel/layer_config";
 import React from "react";
 import { storiesOf } from "@storybook/react";
 
