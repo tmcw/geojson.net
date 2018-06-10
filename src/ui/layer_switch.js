@@ -1,8 +1,6 @@
 import React from "react";
-import L from "leaflet";
-import { layers } from "../layers";
 
-export default ({ layer, setLayer }) => (
+export default ({ layer, layers, setLayer }) => (
   <div className="flex">
     {layers.map(({ id, title }) => (
       <span
@@ -15,5 +13,5 @@ export default ({ layer, setLayer }) => (
         {title}
       </span>
     ))}
-  </div>
+  </div>  
 );

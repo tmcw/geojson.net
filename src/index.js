@@ -9,6 +9,7 @@ import User from "./ui/user";
 import Map from "./ui/map";
 import GithubModal from "./ui/github_modal";
 import GistModal from "./ui/gist_modal";
+import ConfigModal from "./ui/layer_modal";
 import Panel from "./panel/index";
 import ApolloClient from "apollo-client";
 import { createHttpLink } from "apollo-link-http";
@@ -18,6 +19,7 @@ import { ApolloProvider } from "react-apollo";
 import Dropzone from "react-dropzone";
 import magicFile from "./lib/magic_file";
 import mergeGeojson from "./lib/merge_geojson";
+import { layers } from "./layers";
 
 const { access_token } = querystring.parse(location.search.replace(/^\?/, ""));
 
@@ -50,8 +52,10 @@ class App extends React.Component {
   state = {
     mode: "code",
     layer: "mapbox",
+    layers: layers,
     githubModal: false,
     gistModal: false,
+    configModal: false,
     geojson: initialGeojson,
     changeFrom: undefined,
     dropzoneActive: false,
@@ -74,6 +78,35 @@ class App extends React.Component {
     this.setState(({ gistModal }) => ({
       gistModal: !gistModal
     }));
+  };
+  toggleConfigModal = () => {
+    this.setState(({ configModal }) => ({
+      configModal: !configModal
+    }))
+  };
+  addLayer = event => {
+    event.preventDefault();
+
+    const data = new FormData(event.target);
+
+    const id = data.get('id');
+    const title = data.get('title');
+    const url = data.get('url');
+    const attribution = data.get('attribution');
+
+    const newLayer = {
+      id,
+      title,
+      layer: L.tileLayer(url, {
+        attribution
+      }),
+    }
+    const newLayers = this.state.layers.concat(newLayer);
+    this.setState({
+      layer: id,
+      layers: newLayers,
+      configModal: false
+    });
   };
   setLayer = layer => {
     this.setState({ layer });
@@ -120,10 +153,12 @@ class App extends React.Component {
       geojsonObject,
       changeFrom,
       layer,
+      layers,
       map,
       mode,
       githubModal,
       gistModal,
+      configModal,
       accept,
       files,
       dropzoneActive,
@@ -151,17 +186,24 @@ class App extends React.Component {
                     setGeojson={setGeojson}
                     toggleGithubModal={this.toggleGithubModal}
                     toggleGistModal={this.toggleGistModal}
+                    toggleConfigModal={this.toggleConfigModal}
                   />
                 </div>
                 <Map
                   layer={layer}
+                  layers={layers}
                   geojson={geojson}
                   setGeojson={setGeojson}
                   changeFrom={changeFrom}
                   showPanel={showPanel}
                 />
                 <div className="flex justify-between bt">
-                  <LayerSwitch layer={layer} setLayer={setLayer} />
+                  <LayerSwitch layers={layers} layer={layer} setLayer={setLayer} />
+                  <span onClick={this.toggleConfigModal}>
+                    <div className="f6 fw7 dib pa2 no-underline bg-animate bg-white hover-bg-light-blue black">
+                      +Add Layer
+                    </div>
+                  </span>
                   <span onClick={this.togglePanel}>
                     {showPanel ? "▷" : "◁"}
                   </span>
@@ -190,6 +232,7 @@ class App extends React.Component {
                 <GithubModal toggleGithubModal={this.toggleGithubModal} />
               )}
               {gistModal && <GistModal />}
+              {configModal && <ConfigModal onCancel={this.toggleConfigModal} onSubmit={this.addLayer}/>}
             </div>
           </div>
           {dropzoneActive && (

@@ -4,7 +4,6 @@ import L from "leaflet";
 import "leaflet-hash";
 import "leaflet-editable";
 import marker from "../map/marker";
-import { layers } from "../layers";
 import Popup from "./popup";
 import geojsonRewind from "geojson-rewind";
 import simplestyle from "./simplestyle";
@@ -59,7 +58,7 @@ export default class Map extends React.Component {
     map.attributionControl.setPrefix("");
 
     const baseLayerGroup = L.layerGroup().addTo(map);
-    layers.find(({ id }) => id === layer).layer.addTo(baseLayerGroup);
+    this.props.layers.find(({ id }) => id === layer).layer.addTo(baseLayerGroup);
     // map.on("editable:drawing:commit", this.updateFromMap);
 
     L.EditControl = L.Control.extend({
@@ -244,7 +243,7 @@ export default class Map extends React.Component {
     }
     if (layer !== prevProps.layer) {
       baseLayerGroup.clearLayers();
-      layers.find(({ id }) => id === layer).layer.addTo(baseLayerGroup);
+      this.props.layers.find(({ id }) => id === layer).layer.addTo(baseLayerGroup);
     }
     if (geojson !== prevProps.geojson && changeFrom !== "map") {
       const {

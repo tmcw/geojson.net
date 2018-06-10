@@ -1,4 +1,5 @@
 import Table from "../src/panel/table";
+import Config from "../src/panel/layer_config";
 import React from "react";
 import { storiesOf } from "@storybook/react";
 
@@ -27,5 +28,11 @@ const geojsonFixture = {
 storiesOf("Table", module).add("default", () => (
   <div className="sans-serif pa4">
     <Table geojsonObject={geojsonFixture} />
+  </div>
+));
+
+storiesOf("Config", module).add("default", () => (
+  <div className="sans-serif pa4">
+    <Config />
   </div>
 ));
