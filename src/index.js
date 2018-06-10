@@ -9,7 +9,7 @@ import User from "./ui/user";
 import Map from "./ui/map";
 import GithubModal from "./ui/github_modal";
 import GistModal from "./ui/gist_modal";
-import ConfigModal from "./ui/layer_modal";
+import LayerModal from "./ui/layer_modal";
 import Panel from "./panel/index";
 import ApolloClient from "apollo-client";
 import { createHttpLink } from "apollo-link-http";
@@ -55,7 +55,7 @@ class App extends React.Component {
     layers: layers,
     githubModal: false,
     gistModal: false,
-    configModal: false,
+    layerModal: false,
     geojson: initialGeojson,
     changeFrom: undefined,
     dropzoneActive: false,
@@ -79,33 +79,33 @@ class App extends React.Component {
       gistModal: !gistModal
     }));
   };
-  toggleConfigModal = () => {
-    this.setState(({ configModal }) => ({
-      configModal: !configModal
-    }))
+  toggleLayerModal = () => {
+    this.setState(({ layerModal }) => ({
+      layerModal: !layerModal
+    }));
   };
   addLayer = event => {
     event.preventDefault();
 
     const data = new FormData(event.target);
 
-    const id = data.get('id');
-    const title = data.get('title');
-    const url = data.get('url');
-    const attribution = data.get('attribution');
+    const id = data.get("id");
+    const title = data.get("title");
+    const url = data.get("url");
+    const attribution = data.get("attribution");
 
     const newLayer = {
       id,
       title,
       layer: L.tileLayer(url, {
         attribution
-      }),
-    }
+      })
+    };
     const newLayers = this.state.layers.concat(newLayer);
     this.setState({
       layer: id,
       layers: newLayers,
-      configModal: false
+      layerModal: false
     });
   };
   setLayer = layer => {
@@ -158,7 +158,7 @@ class App extends React.Component {
       mode,
       githubModal,
       gistModal,
-      configModal,
+      layerModal,
       accept,
       files,
       dropzoneActive,
@@ -198,12 +198,17 @@ class App extends React.Component {
                   showPanel={showPanel}
                 />
                 <div className="flex justify-between bt">
-                  <LayerSwitch layers={layers} layer={layer} setLayer={setLayer} />
-                  <span onClick={this.toggleConfigModal}>
-                    <div className="f6 fw7 dib pa2 no-underline bg-animate bg-white hover-bg-light-blue black">
-                      +Add Layer
-                    </div>
-                  </span>
+                  <LayerSwitch
+                    layers={layers}
+                    layer={layer}
+                    setLayer={setLayer}
+                  />
+                  <div
+                    onClick={this.toggleLayerModal}
+                    className="f6 fw7 dib pa2 no-underline bg-white hover-bg-light-blue black pointer"
+                  >
+                    Add layer
+                  </div>
                   <span onClick={this.togglePanel}>
                     {showPanel ? "▷" : "◁"}
                   </span>
@@ -232,7 +237,12 @@ class App extends React.Component {
                 <GithubModal toggleGithubModal={this.toggleGithubModal} />
               )}
               {gistModal && <GistModal />}
-              {configModal && <ConfigModal onCancel={this.toggleConfigModal} onSubmit={this.addLayer}/>}
+              {layerModal && (
+                <LayerModal
+                  onCancel={this.toggleLayerModal}
+                  onSubmit={this.addLayer}
+                />
+              )}
             </div>
           </div>
           {dropzoneActive && (

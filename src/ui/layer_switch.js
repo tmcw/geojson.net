@@ -6,12 +6,12 @@ export default ({ layer, layers, setLayer }) => (
       <span
         key={id}
         onClick={() => setLayer(id)}
-        className={`db pointer bn pa2 nowrap outline-0 ${
-          layer === id ? "bg-yellow" : ""
-        }`}
+        className={`db pointer bn pa2 nowrap outline-0 ${layer === id
+          ? "bg-yellow"
+          : ""}`}
       >
         {title}
       </span>
     ))}
-  </div>  
+  </div>
 );
