@@ -126,22 +126,19 @@ class App extends React.Component {
     });
     this.importFiles(files);
   };
-  importFiles = files => {
+  importFiles = async files => {
     const { geojson } = this.state;
     const { setGeojson } = this;
-    Promise.all(
-      files.map(file => {
-        return new Promise(resolve => {
-          const reader = new FileReader();
-          reader.readAsText(file);
-          reader.addEventListener("load", () =>
-            resolve(magicFile(reader.result))
-          );
-        });
-      })
-    ).then(geojsons => {
-      setGeojson(mergeGeojson([geojson, ...geojsons]));
+    const geojsons = files.map(file => {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.readAsText(file);
+        reader.addEventListener("load", () =>
+          resolve(magicFile(reader.result))
+        );
+      });
     });
+    setGeojson(mergeGeojson([geojson, ...geojsons]));
   };
   render() {
     const {

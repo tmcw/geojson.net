@@ -1,7 +1,6 @@
 import React from "react";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import config from "../config";
 
 export default class User extends React.Component {
   state = {

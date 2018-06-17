@@ -11,7 +11,6 @@ import tokml from "tokml";
 import geojsonNormalize from "@mapbox/geojson-normalize";
 import simplify from "@turf/simplify";
 import wellknown from "wellknown";
-import config from "../config.js";
 import magicFile from "../lib/magic_file";
 import geojsonRandom from "geojson-random";
 import geojsonExtent from "geojson-extent";
@@ -26,22 +25,19 @@ export default class FileBar extends React.Component {
   blindImport = () => {
     this.fileInputRef.current.click();
   };
-  onFileInputChange = e => {
+  onFileInputChange = async e => {
     const { files } = e.target;
     const { geojson, setGeojson } = this.props;
-    Promise.all(
-      [...files].map(file => {
-        return new Promise(resolve => {
-          const reader = new FileReader();
-          reader.readAsText(file);
-          reader.addEventListener("load", () =>
-            resolve(magicFile(reader.result))
-          );
-        });
-      })
-    ).then(geojsons => {
-      setGeojson(mergeGeojson([geojson, ...geojsons]));
+    const geojsons = [...files].map(file => {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.readAsText(file);
+        reader.addEventListener("load", () =>
+          resolve(magicFile(reader.result))
+        );
+      });
     });
+    setGeojson(mergeGeojson([geojson, ...geojsons]));
   };
   downloadTopo = () => {
     const { geojson } = this.props;
