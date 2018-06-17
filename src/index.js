@@ -20,13 +20,9 @@ import Dropzone from "react-dropzone";
 import magicFile from "./lib/magic_file";
 import mergeGeojson from "./lib/merge_geojson";
 import { layers } from "./layers";
+import Auth from "./auth";
 
-const { access_token } = querystring.parse(location.search.replace(/^\?/, ""));
-
-if (access_token) {
-  localStorage.setItem("githubToken", access_token);
-  location.replace("/");
-}
+const auth = new Auth();
 
 const middlewareLink = new ApolloLink((operation, forward) => {
   operation.setContext({
@@ -223,7 +219,7 @@ class App extends React.Component {
                     }}
                   >
                     <ModeButtons mode={mode} setMode={setMode} />
-                    <User />
+                    <User login={auth.login} />
                   </div>
                   <Panel
                     mode={mode}
