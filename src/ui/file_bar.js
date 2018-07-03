@@ -28,7 +28,7 @@ export default class FileBar extends React.Component {
   onFileInputChange = async e => {
     const { files } = e.target;
     const { geojson, setGeojson } = this.props;
-    const geojsons = [...files].map(file => {
+    const geojsons = await Promise.all([...files].map(file => {
       return new Promise(resolve => {
         const reader = new FileReader();
         reader.readAsText(file);
@@ -36,7 +36,7 @@ export default class FileBar extends React.Component {
           resolve(magicFile(reader.result))
         );
       });
-    });
+    }));
     setGeojson(mergeGeojson([geojson, ...geojsons]));
   };
   downloadTopo = () => {
