@@ -30,7 +30,11 @@ passport.use(new GitHubStrategy({
 let bundler = new Bundler('index.html');
 let app = express();
 
-app.use(session({ secret: process.env.SESSION_SECRET }));
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  saveUninitialized: true,
+  resave: true
+}));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
