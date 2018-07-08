@@ -1,4 +1,5 @@
 import React from "react";
+import config from "../config.js";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
 
