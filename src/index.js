@@ -129,7 +129,7 @@ class App extends React.Component {
   importFiles = async files => {
     const { geojson } = this.state;
     const { setGeojson } = this;
-    const geojsons = files.map(file => {
+    const geojsons = await Promise.all(files.map(file => {
       return new Promise(resolve => {
         const reader = new FileReader();
         reader.readAsText(file);
@@ -137,7 +137,7 @@ class App extends React.Component {
           resolve(magicFile(reader.result))
         );
       });
-    });
+    }));
     setGeojson(mergeGeojson([geojson, ...geojsons]));
   };
   render() {
