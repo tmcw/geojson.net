@@ -12,7 +12,6 @@ export default class User extends React.Component {
     });
   };
   render() {
-    const { login } = this.props;
     const { privateRepoPermissions } = this.state;
     return (
       <Query
@@ -30,8 +29,10 @@ export default class User extends React.Component {
           if (error)
             return (
               <a
-                className="pointer no-underline disappear-child relative pa2 black hover-bg-yellow"
-                onClick={login}
+                className="no-underline disappear-child relative pa2 black hover-bg-yellow"
+                href={`${config}/login?scope=${
+                  privateRepoPermissions ? "repo" : "public_repo"
+                },read:org`}
               >
                 Log in
                 <div
