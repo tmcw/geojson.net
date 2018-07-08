@@ -29,16 +29,11 @@ if (access_token) {
 }
 
 const middlewareLink = new ApolloLink((operation, forward) => {
-  operation.setContext({
-    headers: {
-      authorization: `bearer ${localStorage.getItem("githubToken")}`
-    }
-  });
   return forward(operation);
 });
 
 let httpLink = middlewareLink.concat(
-  createHttpLink({ uri: "https://api.github.com/graphql" })
+  createHttpLink({ uri: "/github/graphql", credentials: 'include' })
 );
 
 const client = new ApolloClient({
