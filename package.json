@@ -1,6 +1,6 @@
 {
   "name": "geojson-net",
-  "version": "0.1.1",
+  "version": "0.0.0",
   "description": "create and edit maps, on the internet",
   "main": "index.html",
   "dependencies": {
@@ -76,7 +76,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "build": "parcel build",
+    "build": "parcel build index.html",
     "test": "jest",
     "storybook": "start-storybook -p 9001"
   },

@@ -1,4 +1,3 @@
-const Bundler = require('parcel-bundler');
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
@@ -6,13 +5,19 @@ const passport = require('passport');
 const GitHubStrategy = require('passport-github');
 const proxy = require('express-http-proxy');
 
+let app = express();
+
 if (process.env.NODE_ENV !== 'production') {
   require('now-env');
+  const Bundler = require('parcel-bundler');
+  const bundler = new Bundler('index.html');
+  app.use(bundler.middleware());
+} else {
+  app.use(express.static('dist'));
 }
 
-const PORT = process.env.PORT || 1234;
+const PORT = process.env.PORT || 3000;
 
-let app = express();
 
 passport.serializeUser(function(user, done) {
   done(null, JSON.stringify(user));
@@ -62,11 +67,5 @@ app.use('/github', proxy('api.github.com', {
   }
 }));
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('dist'));
-} else {
-  const bundler = new Bundler('index.html');
-  app.use(bundler.middleware());
-}
-
 app.listen(PORT);
+console.log(`Listening on ${PORT}`);
