@@ -1,5 +1,4 @@
 import React from "react";
-import config from "../config.js";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
 
@@ -31,7 +30,7 @@ export default class User extends React.Component {
             return (
               <a
                 className="no-underline disappear-child relative pa2 black hover-bg-yellow"
-                href={`${config}/login?scope=${
+                href={`/auth/github?scope=${
                   privateRepoPermissions ? "repo" : "public_repo"
                 },read:org`}
               >
