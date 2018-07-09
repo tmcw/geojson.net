@@ -1,4 +1,5 @@
 {
+  "alias": "geojson.net",
   "env": {
     "GITHUB_CLIENT_ID": "@geojsonnet-github-client-id",
     "GITHUB_CLIENT_SECRET": "@geojsonnet-github-client-secret",
