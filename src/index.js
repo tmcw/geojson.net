@@ -13,7 +13,6 @@ import LayerModal from "./ui/layer_modal";
 import Panel from "./panel/index";
 import ApolloClient from "apollo-client";
 import { createHttpLink } from "apollo-link-http";
-import { ApolloLink } from "apollo-link";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { ApolloProvider } from "react-apollo";
 import Dropzone from "react-dropzone";
@@ -21,23 +20,8 @@ import magicFile from "./lib/magic_file";
 import mergeGeojson from "./lib/merge_geojson";
 import { layers } from "./layers";
 
-const { access_token } = querystring.parse(location.search.replace(/^\?/, ""));
-
-if (access_token) {
-  localStorage.setItem("githubToken", access_token);
-  location.replace("/");
-}
-
-const middlewareLink = new ApolloLink((operation, forward) => {
-  return forward(operation);
-});
-
-let httpLink = middlewareLink.concat(
-  createHttpLink({ uri: "/github/graphql", credentials: 'include' })
-);
-
 const client = new ApolloClient({
-  link: httpLink,
+  link: createHttpLink({ uri: "/github/graphql", credentials: 'include' }),
   cache: new InMemoryCache().restore(window.__APOLLO_STATE__)
 });
 
