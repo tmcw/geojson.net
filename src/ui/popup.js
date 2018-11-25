@@ -61,7 +61,7 @@ const Metadata = ({ layer }) => {
   const { geometry } = layer.toGeoJSON();
   if (geometry.type === "Point") {
     const {
-      coordinates: [latitude, longitude]
+      coordinates: [longitude, latitude]
     } = geometry;
     return (
       <Table
