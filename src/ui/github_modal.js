@@ -63,7 +63,7 @@ const TEXT_QUERY = gql`
   }
 `;
 
-const Import = ({ id }) => (
+const Import = ({ id, importGithub }) => (
   <Query query={TEXT_QUERY} variables={{ id }}>
     {({ loading, error, data }) =>
       loading ? (
@@ -77,7 +77,7 @@ const Import = ({ id }) => (
           </div>
           <div
             className="pa2 hover-bg-yellow bt pointer"
-            onClick={() => this.props.importFiles(data.node.text)}
+            onClick={() => importGithub(data.node.text)}
           >
             Import
           </div>
@@ -175,7 +175,7 @@ const RepoBrowser = ({ setRepository }) => (
   </Query>
 );
 
-export default class extends React.Component {
+export default class GithubModal extends React.Component {
   state = {
     organization: undefined,
     repository: undefined,
@@ -197,6 +197,17 @@ export default class extends React.Component {
       // enter tree.
     }
   };
+
+  importGithub = text => {
+    try {
+      console.log(text);
+      const json = JSON.parse(text);
+      this.props.setGeojson(json);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   render() {
     const { repository, prospectiveImportId } = this.state;
     const { toggleGithubModal } = this.props;
@@ -216,6 +227,7 @@ export default class extends React.Component {
           <div
             className="bg-white flex items-stretch ba"
             style={{
+              maxHeight: '85vh',
               zIndex: 999
             }}
           >
@@ -224,7 +236,7 @@ export default class extends React.Component {
             {repository && (
               <FileBrowser repository={repository} clickFile={clickFile} />
             )}
-            {prospectiveImportId && <Import id={prospectiveImportId} />}
+            {prospectiveImportId && <Import id={prospectiveImportId} importGithub={this.importGithub} />}
           </div>
           <span
             onClick={toggleGithubModal}
