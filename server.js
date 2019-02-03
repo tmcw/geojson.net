@@ -1,5 +1,7 @@
 const express = require("express");
-const session = require("express-session");
+const cookieParser = require("cookie-parser");
+const { Strategy: JwtStrategy } = require("passport-jwt");
+const generateJwt = require("./generate-token");
 const bodyParser = require("body-parser");
 const passport = require("passport");
 const GitHubStrategy = require("passport-github");
@@ -13,13 +15,22 @@ if (process.env.NODE_ENV !== "production") {
 
 const PORT = process.env.PORT || 1234;
 
-passport.serializeUser(function(user, done) {
-  done(null, JSON.stringify(user));
+
+function cookieExtractory (req) {
+  return (req && req.cookies)
+    ? req.cookies["geojsonnet-jwt"]
+    : null
+}
+const jwtStrategy = new JwtStrategy({
+  jwtFromRequest: cookieExtractory,
+  secretOrKey: process.env.SESSION_SECRET,
+  issuer: "geojsonnet",
+  audience: "geojsonnet"
+}, (jwt, next) => {
+  next(null, jwt)
 });
 
-passport.deserializeUser(function(str, done) {
-  done(null, JSON.parse(str));
-});
+passport.use("jwt", jwtStrategy);
 
 const strategy = new GitHubStrategy(
   {
@@ -32,19 +43,12 @@ const strategy = new GitHubStrategy(
   }
 );
 
-passport.use(strategy);
+passport.use("github", strategy, {session: false});
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    saveUninitialized: true,
-    resave: true
-  })
-);
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
-app.use(passport.session());
 
 app.get("/auth/github", (req, res, next) => {
   strategy._callbackURL = `${
@@ -61,21 +65,35 @@ app.get("/auth/github", (req, res, next) => {
 
 app.get(
   "/auth/github/callback",
-  passport.authenticate("github", { failureRedirect: "/login" }),
+  passport.authenticate("github", { session: false, failureRedirect: "/login" }),
   function(req, res) {
+    const token = generateJwt(req.user);
+
+    res.cookie("geojsonnet-jwt", token);
     res.redirect("/");
   }
 );
 
+app.get(
+  "/auth/github/logout",
+  function(req, res) {
+    res.cookie("geojsonnet-jwt", "", {
+      maxAge: "-9"
+    });
+    res.redirect("/");;
+  }
+);
+
 app.use(
-  "/github",
+  "/github/",
+  passport.authenticate(["jwt"], { session: false }),
   proxy("api.github.com", {
     https: true,
-    filter: (req, res) => req.user,
     proxyReqPathResolver() {
       return "/graphql";
     },
     proxyReqOptDecorator: function(proxyReqOpts, srcReq) {
+      proxyReqOpts.headers["Cookie"] = "";
       proxyReqOpts.headers["Authorization"] = `bearer ${
         srcReq.user.accessToken
       }`;

@@ -1,5 +1,16 @@
 {
+  "version": 2,
+  "name": "geojson.net",
   "alias": "geojson.net",
+  "builds": [
+    {"src": "package.json", "use": "@now/static-build", "config": { "newPipeline": true }},
+    {"src": "server.js", "use": "@now/node-server", "config": { "newPipeline": true }}
+  ],
+  "routes": [
+    { "src": "/github/.*", "dest": "/server.js"},
+    { "src": "/auth/.*", "dest": "/server.js"},
+    { "src": "/(.*)", "dest": "/$1"}
+  ],
   "env": {
     "NODE_ENV": "production",
     "GITHUB_CLIENT_ID": "@geojsonnet-github-client-id",

@@ -210,7 +210,7 @@ class App extends React.Component {
                 </div>
               )}
               {githubModal && (
-                <GithubModal toggleGithubModal={this.toggleGithubModal} />
+                <GithubModal toggleGithubModal={this.toggleGithubModal} setGeojson={setGeojson} />
               )}
               {gistModal && <GistModal />}
               {layerModal && (

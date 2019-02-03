@@ -58,10 +58,7 @@ export default class User extends React.Component {
               {data.viewer.login}
               <a
                 className="ph2 pointer hover-bg-yellow pa2 ml2"
-                onClick={() => {
-                  localStorage.removeItem("githubToken");
-                  location.reload();
-                }}
+                href="/auth/github/logout"
               >
                 logout
               </a>
