@@ -48,12 +48,12 @@ export default class Map extends React.Component {
       .setPosition("bottomright")
       .addTo(map);
     map.zoomControl.setPosition("topright");
+    map.setView([20, 0], 2);
 
     L.hash(map);
     const metric =
       navigator.language !== "en-us" && navigator.language !== "en-US";
 
-    map.setView([20, 0], 2);
 
     map.attributionControl.setPrefix("");
 
