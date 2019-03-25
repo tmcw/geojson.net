@@ -175,9 +175,9 @@ export default class Map extends React.Component {
   };
   popupRemoveLayer = layer => {
     const { setGeojson } = this.props;
-    const { mapLayer } = this.state;
-    mapLayer.removeLayer(layer);
-    let geojson = geojsonRewind(mapLayer.toGeoJSON());
+    const { map: { editTools: { featuresLayer } } } = this.state;
+    featuresLayer.removeLayer(layer);
+    let geojson = geojsonRewind(featuresLayer.toGeoJSON());
     setGeojson(geojson, "map");
   };
   editProperties = (update, layer) => {
