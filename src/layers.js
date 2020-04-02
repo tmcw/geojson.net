@@ -6,7 +6,7 @@ export const layers = [
     title: "Mapbox",
     id: "mapbox",
     layer: L.tileLayer(
-      "https://b.tiles.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}@2x.png?access_token=" +
+      "https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/256/{z}/{x}/{y}@2x?access_token=" +
         token
     )
   },
@@ -14,7 +14,7 @@ export const layers = [
     title: "Satellite",
     id: "satellite",
     layer: L.tileLayer(
-      "https://b.tiles.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=" +
+      "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=" +
         token
     )
   },
