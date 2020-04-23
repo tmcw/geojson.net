@@ -1,5 +1,5 @@
 const token =
-  "pk.eyJ1IjoidG1jdyIsImEiOiJjamJ6eXpkd2EwMndoMzRtb3B6NjkyZG85In0.8kzWTUAe9DL5YzckMAEYfA";
+  "pk.eyJ1IjoidG1jdyIsImEiOiJjazljNTA5dmwwMWFkM2ZyMG15cHY2ZjM4In0.uyEICzWdVoZ5In9tiuBKQQ";
 
 export const layers = [
   {
