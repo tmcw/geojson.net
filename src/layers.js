@@ -1,5 +1,6 @@
+// Please don't use this for other stuff, I am so tired of switching it out.
 const token =
-  "pk.eyJ1IjoidG1jdyIsImEiOiJjazljNTA5dmwwMWFkM2ZyMG15cHY2ZjM4In0.uyEICzWdVoZ5In9tiuBKQQ";
+  "pk.eyJ1IjoidG1jdyIsImEiOiJja2ZrNXFyenUwcGV5Mnlwam0ycmczeDFlIn0.x-B_-SI6_9JtPVkWdHUbDQ";
 
 export const layers = [
   {
