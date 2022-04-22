@@ -79,11 +79,7 @@
     "storybook": "^1.0.0"
   },
   "scripts": {
-    "start": "node server.js",
-    "build": "parcel build index.html",
-    "test": "jest",
-    "storybook": "start-storybook -p 9001",
-    "now-build": "yarn build"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
